@@ -1,0 +1,39 @@
+
+name: Publicar AP FUTSAL para iPhone
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'iphone/**'
+      - '.github/workflows/deploy-iphone.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar archivos de iPhone
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: iphone
+
+      - name: Publicar web
+        id: deployment
+        uses: actions/deploy-pages@v4
