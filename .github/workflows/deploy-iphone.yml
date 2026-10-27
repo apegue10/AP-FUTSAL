@@ -28,6 +28,10 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
+              - name: Comprobar carpetas
+        run: |
+          pwd
+          ls -la
 
       - name: Preparar archivos de iPhone
         uses: actions/upload-pages-artifact@v3
