@@ -31,7 +31,7 @@ jobs:
 
       - name: Extraer proyecto
         run: |
-          unzip AP_FUTSAL_Android_ICON_ACTUALIZADO_DESCARGA.zip
+          unzip AP_FUTSAL_Android_PDF_CANCELAR_CORREGIDO.zip
           echo "PROJECT_DIR=AP_FUTSAL_Android" >> "$GITHUB_ENV"
 
       - name: Compilar APK
