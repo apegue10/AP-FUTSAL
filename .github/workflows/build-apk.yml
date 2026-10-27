@@ -22,7 +22,7 @@ jobs:
           java-version: '17'
 
       - name: Preparar Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Instalar Gradle
         uses: gradle/actions/setup-gradle@v4
