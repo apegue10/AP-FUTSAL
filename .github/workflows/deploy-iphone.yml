@@ -27,12 +27,12 @@ jobs:
         run: |
           pwd
           ls -la
-          ls -la iphone
+          ls -la iPhone
 
       - name: Preparar archivos de iPhone
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./iphone
+          path: ./iPhone
 
       - name: Publicar web
         uses: actions/deploy-pages@v4
