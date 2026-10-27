@@ -1,0 +1,47 @@
+
+name: Crear APK de AP FUTSAL
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Extraer proyecto
+        run: |
+          unzip AP_FUTSAL_Android_proyecto_inicial.zip
+          echo "PROJECT_DIR=AP_FUTSAL_Android" >> "$GITHUB_ENV"
+
+      - name: Compilar APK
+        run: |
+          cd "$PROJECT_DIR"
+          gradle assembleDebug
+
+      - name: Guardar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AP-FUTSAL-APK
+          path: AP_FUTSAL_Android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
