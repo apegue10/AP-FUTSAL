@@ -1,0 +1,34 @@
+
+name: Extraer código de AP FUTSAL para revisión
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Descomprimir proyecto Android
+        run: |
+          unzip -q AP_FUTSAL_Android_COMPETICIONES_PERSONALIZADAS.zip
+          test -d AP_FUTSAL_Android
+          mkdir -p extracted-source/AP_FUTSAL_Android
+          cp -R AP_FUTSAL_Android/. extracted-source/AP_FUTSAL_Android/
+
+      - name: Publicar copia en una rama separada
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="source-inspection-${RUN_NUMBER}"
+          git checkout -b "$BRANCH"
+          git add extracted-source/
+          git commit -m "Añadir copia del proyecto Android para revisión"
+          git push origin "$BRANCH"
