@@ -1,0 +1,40 @@
+
+name: Preparar rama de trabajo para la nube
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  preparar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Crear rama de trabajo
+        run: |
+          git fetch origin
+          if git ls-remote --heads origin feature/cloud-sync-foundation | grep -q feature/cloud-sync-foundation; then
+            git checkout feature/cloud-sync-foundation
+          else
+            git checkout -b feature/cloud-sync-foundation origin/source-inspection-1
+          fi
+
+      - name: Comprobar código extraído
+        run: |
+          test -f extracted-source/AP_FUTSAL_Android/app/src/main/assets/index.html
+          echo "Código de AP FUTSAL localizado correctamente."
+
+      - name: Guardar rama de trabajo
+        run: |
+          git push origin feature/cloud-sync-foundation
