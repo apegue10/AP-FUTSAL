@@ -1,0 +1,320 @@
+
+name: Preparar sincronizacion nube AP FUTSAL
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preparar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar rama de trabajo
+        uses: actions/checkout@v4
+        with:
+          ref: feature/cloud-sync-foundation
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Comprobar secretos de Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" || (echo "Falta SUPABASE_URL" && exit 1)
+          test -n "$SUPABASE_PUBLISHABLE_KEY" || (echo "Falta SUPABASE_PUBLISHABLE_KEY" && exit 1)
+          echo "Los dos secretos están configurados."
+
+      - name: Preparar codigo de la aplicacion
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          python3 <<'PY'
+          import os
+          from pathlib import Path
+
+          root = Path("extracted-source/AP_FUTSAL_Android")
+          html = root / "app/src/main/assets/index.html"
+          manifest = root / "app/src/main/AndroidManifest.xml"
+
+          if not html.is_file() or not manifest.is_file():
+              raise SystemExit("No se encuentra el proyecto Android extraido.")
+
+          s = html.read_text(encoding="utf-8")
+          target = '<section id="view-ajustes" class="view"><div class="layout">'
+
+          if 'id="cloud-panel"' not in s:
+              if target not in s:
+                  raise SystemExit("No se encontro el punto de insercion de Ajustes.")
+
+              panel = '''<section id="cloud-panel" class="panel" style="margin:12px">
+          <h2>☁️ Cuenta y equipo</h2>
+          <p class="muted">Tus datos locales se conservan. La sincronizacion requiere Internet.</p>
+          <div class="field"><label>Correo electronico</label><input id="cloud-email" type="email" autocomplete="email"></div>
+          <div class="field"><label>Contrasena</label><input id="cloud-password" type="password" autocomplete="current-password"></div>
+          <div class="tools"><button class="primary" onclick="cloudSignIn()">Iniciar sesion</button><button onclick="cloudSignUp()">Crear cuenta</button><button onclick="cloudSignOut()">Cerrar sesion</button></div>
+          <p id="cloud-auth-status" class="muted">Sin iniciar sesion.</p>
+          <hr>
+          <div class="field"><label>Nombre del equipo nuevo</label><input id="cloud-team-name" maxlength="80"></div>
+          <button class="blue" onclick="cloudCreateTeam()">Crear equipo</button>
+          <div class="field"><label>Codigo de invitacion</label><input id="cloud-invite-code" maxlength="8" autocapitalize="characters"></div>
+          <button onclick="cloudJoinTeam()">Unirme a un equipo</button>
+          <p id="cloud-team-status" class="muted">Ningun equipo seleccionado.</p>
+          <div class="tools"><button class="primary" onclick="cloudPull()">Descargar datos</button><button class="blue" onclick="cloudPush()">Subir datos</button></div>
+          <p class="muted">Antes de descargar, crea una copia JSON. Descargar reemplaza los datos locales por los compartidos del equipo. Subir publica los datos locales para el equipo.</p>
+          </section>'''
+
+              s = s.replace(target, target + panel, 1)
+
+          if "AP_FUTSAL_CLOUD_SCRIPT" not in s:
+              script = r"""
+          // AP_FUTSAL_CLOUD_SCRIPT
+          const AP_CLOUD_URL = '__SUPABASE_URL__';
+          const AP_CLOUD_KEY = '__SUPABASE_PUBLISHABLE_KEY__';
+          const AP_CLOUD_SESSION = 'ap-futsal-cloud-session-v1';
+          const AP_CLOUD_TEAM = 'ap-futsal-cloud-team-v1';
+
+          function cloudSession() {
+            try { return JSON.parse(localStorage.getItem(AP_CLOUD_SESSION) || 'null'); }
+            catch (_) { return null; }
+          }
+          function cloudTeam() {
+            try { return JSON.parse(localStorage.getItem(AP_CLOUD_TEAM) || 'null'); }
+            catch (_) { return null; }
+          }
+          function cloudStatus(id, message) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = message;
+          }
+          function cloudHeaders(extra = {}) {
+            const session = cloudSession();
+            return Object.assign({
+              apikey: AP_CLOUD_KEY,
+              'Content-Type': 'application/json'
+            }, session && session.access_token
+              ? { Authorization: 'Bearer ' + session.access_token }
+              : {}, extra);
+          }
+          async function cloudRequest(path, options = {}) {
+            if (!AP_CLOUD_URL || AP_CLOUD_URL.startsWith('__'))
+              throw Error('Falta configurar Supabase.');
+            const response = await fetch(
+              AP_CLOUD_URL.replace(/\/$/, '') + path,
+              Object.assign({ headers: cloudHeaders() }, options)
+            );
+            const raw = await response.text();
+            let data;
+            try { data = raw ? JSON.parse(raw) : null; }
+            catch (_) { data = raw; }
+            if (!response.ok) {
+              throw Error(data && (data.message || data.msg || data.error_description)
+                || (typeof data === 'string' ? data : 'Error HTTP ' + response.status));
+            }
+            return data;
+          }
+          function cloudRequireSession() {
+            const session = cloudSession();
+            if (!session || !session.access_token)
+              throw Error('Inicia sesion primero.');
+            return session;
+          }
+          async function cloudSignIn() {
+            try {
+              const email = document.getElementById('cloud-email').value.trim();
+              const password = document.getElementById('cloud-password').value;
+              if (!email || !password) throw Error('Escribe correo y contrasena.');
+              const data = await cloudRequest('/auth/v1/token?grant_type=password', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+              });
+              localStorage.setItem(AP_CLOUD_SESSION, JSON.stringify(data));
+              cloudStatus('cloud-auth-status', 'Sesion iniciada: ' + (data.user?.email || email));
+              cloudRefreshStatus();
+            } catch (e) {
+              cloudStatus('cloud-auth-status', 'Error: ' + e.message);
+            }
+          }
+          async function cloudSignUp() {
+            try {
+              const email = document.getElementById('cloud-email').value.trim();
+              const password = document.getElementById('cloud-password').value;
+              if (!email || password.length < 6)
+                throw Error('Escribe un correo y una contrasena de al menos 6 caracteres.');
+              const data = await cloudRequest('/auth/v1/signup', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+              });
+              if (data && data.access_token) {
+                localStorage.setItem(AP_CLOUD_SESSION, JSON.stringify(data));
+                cloudStatus('cloud-auth-status', 'Cuenta creada e iniciada: ' + email);
+              } else {
+                cloudStatus('cloud-auth-status', 'Cuenta creada. Confirma el correo y despues inicia sesion.');
+              }
+            } catch (e) {
+              cloudStatus('cloud-auth-status', 'Error: ' + e.message);
+            }
+          }
+          async function cloudSignOut() {
+            try {
+              const session = cloudSession();
+              if (session?.access_token) await cloudRequest('/auth/v1/logout', { method: 'POST' });
+            } catch (_) {}
+            localStorage.removeItem(AP_CLOUD_SESSION);
+            cloudStatus('cloud-auth-status', 'Sesion cerrada. Los datos locales se conservan.');
+          }
+          async function cloudCreateTeam() {
+            try {
+              cloudRequireSession();
+              const name = document.getElementById('cloud-team-name').value.trim();
+              if (!name) throw Error('Escribe el nombre del equipo.');
+              const result = await cloudRequest('/rest/v1/rpc/create_team', {
+                method: 'POST', body: JSON.stringify({ team_name: name })
+              });
+              const id = typeof result === 'string' ? result
+                : Array.isArray(result) ? result[0] : result?.id;
+              if (!id) throw Error('No se recibio el identificador del equipo.');
+              const rows = await cloudRequest('/rest/v1/teams?id=eq.' +
+                encodeURIComponent(id) + '&select=id,name,invite_code');
+              if (!rows?.length) throw Error('No se pudo leer el codigo de invitacion.');
+              localStorage.setItem(AP_CLOUD_TEAM, JSON.stringify(rows[0]));
+              cloudRefreshStatus();
+              cloudStatus('cloud-team-status', 'Equipo: ' + rows[0].name +
+                ' · Codigo: ' + rows[0].invite_code);
+            } catch (e) {
+              cloudStatus('cloud-team-status', 'Error: ' + e.message);
+            }
+          }
+          async function cloudJoinTeam() {
+            try {
+              cloudRequireSession();
+              const code = document.getElementById('cloud-invite-code').value.trim().toUpperCase();
+              if (!code) throw Error('Introduce el codigo de invitacion.');
+              const result = await cloudRequest('/rest/v1/rpc/join_team', {
+                method: 'POST', body: JSON.stringify({ invite_code_input: code })
+              });
+              const id = typeof result === 'string' ? result
+                : Array.isArray(result) ? result[0] : result?.id;
+              if (!id) throw Error('No se recibio el identificador del equipo.');
+              const rows = await cloudRequest('/rest/v1/teams?id=eq.' +
+                encodeURIComponent(id) + '&select=id,name,invite_code');
+              if (!rows?.length) throw Error('No se pudo cargar el equipo.');
+              localStorage.setItem(AP_CLOUD_TEAM, JSON.stringify(rows[0]));
+              cloudRefreshStatus();
+              cloudStatus('cloud-team-status', 'Unida al equipo: ' + rows[0].name +
+                ' · Codigo: ' + rows[0].invite_code);
+            } catch (e) {
+              cloudStatus('cloud-team-status', 'Error: ' + e.message);
+            }
+          }
+          function cloudRefreshStatus() {
+            const session = cloudSession();
+            const team = cloudTeam();
+            if (session?.access_token)
+              cloudStatus('cloud-auth-status', 'Sesion iniciada: ' + (session.user?.email || 'cuenta'));
+            if (team)
+              cloudStatus('cloud-team-status', 'Equipo: ' + team.name +
+                ' · Codigo: ' + team.invite_code);
+          }
+          async function cloudPush() {
+            try {
+              const session = cloudRequireSession();
+              const team = cloudTeam();
+              if (!team?.id) throw Error('Crea un equipo o unete a uno primero.');
+              if (!confirm('Se compartiran la plantilla y los datos actuales del partido e historial con el equipo. ¿Continuar?')) return;
+              const templateRaw = localStorage.getItem(TEMPLATE_KEY);
+              const payload = {
+                format: 1,
+                state: S,
+                template: templateRaw ? JSON.parse(templateRaw) : null
+              };
+              const body = {
+                team_id: team.id,
+                payload,
+                updated_by: session.user.id,
+                updated_at: new Date().toISOString()
+              };
+              await cloudRequest('/rest/v1/team_app_data?on_conflict=team_id', {
+                method: 'POST',
+                headers: cloudHeaders({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+                body: JSON.stringify(body)
+              });
+              cloudStatus('cloud-team-status', 'Datos subidos al equipo correctamente.');
+            } catch (e) {
+              cloudStatus('cloud-team-status', 'Error al subir: ' + e.message);
+            }
+          }
+          async function cloudPull() {
+            try {
+              cloudRequireSession();
+              const team = cloudTeam();
+              if (!team?.id) throw Error('Crea un equipo o unete a uno primero.');
+              if (!confirm('Descargar reemplazara los datos locales. Haz antes una copia JSON. ¿Continuar?')) return;
+              const rows = await cloudRequest('/rest/v1/team_app_data?team_id=eq.' +
+                encodeURIComponent(team.id) + '&select=payload,updated_at');
+              if (!rows?.length) throw Error('No hay datos compartidos todavia. Sube primero los datos desde el dispositivo que los tenga.');
+              const payload = rows[0].payload;
+              if (!payload?.state) throw Error('Los datos compartidos no tienen el formato esperado.');
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.state));
+              if (payload.template)
+                localStorage.setItem(TEMPLATE_KEY, JSON.stringify(payload.template));
+              load();
+              renderAll();
+              cloudStatus('cloud-team-status', 'Datos descargados correctamente.');
+            } catch (e) {
+              cloudStatus('cloud-team-status', 'Error al descargar: ' + e.message);
+            }
+          }
+          window.addEventListener('load', cloudRefreshStatus);
+          """
+              tail = '</script></body></html>'
+              if tail not in s:
+                  raise SystemExit("No se encontro el final del HTML.")
+              s = s.replace(tail, script + '\n' + tail, 1)
+
+          s = s.replace('__SUPABASE_URL__', os.environ['SUPABASE_URL'].rstrip('/'))
+          s = s.replace('__SUPABASE_PUBLISHABLE_KEY__', os.environ['SUPABASE_PUBLISHABLE_KEY'])
+          if '__SUPABASE_URL__' in s or '__SUPABASE_PUBLISHABLE_KEY__' in s:
+              raise SystemExit("No se pudo configurar Supabase.")
+
+          html.write_text(s, encoding="utf-8")
+
+          manifest_text = manifest.read_text(encoding="utf-8")
+          permission = 'android.permission.INTERNET'
+          if permission not in manifest_text:
+              manifest_text = manifest_text.replace(
+                  '<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
+                  '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n    <uses-permission android:name="android.permission.INTERNET" />',
+                  1
+              )
+          manifest.write_text(manifest_text, encoding="utf-8")
+          print("Interfaz de nube y permiso de Internet preparados.")
+          PY
+
+      - name: Compilar APK de prueba
+        run: |
+          cd extracted-source/AP_FUTSAL_Android
+          gradle assembleDebug
+
+      - name: Guardar APK de prueba
+        uses: actions/upload-artifact@v4
+        with:
+          name: AP-FUTSAL-Cloud-Test
+          path: extracted-source/AP_FUTSAL_Android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          
