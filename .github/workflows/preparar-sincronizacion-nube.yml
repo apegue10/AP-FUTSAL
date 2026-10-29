@@ -15,7 +15,7 @@ jobs:
       - name: Descargar rama de trabajo
         uses: actions/checkout@v4
         with:
-          ref: feature/cloud-sync-foundation
+          ref: android-nube-ultima-version
 
       - name: Preparar Java
         uses: actions/setup-java@v4
@@ -111,22 +111,107 @@ jobs:
               ? { Authorization: 'Bearer ' + session.access_token }
               : {}, extra);
           }
-          async function cloudRequest(path, options = {}) {
-            if (!AP_CLOUD_URL || AP_CLOUD_URL.startsWith('__'))
-              throw Error('Falta configurar Supabase.');
-            const response = await fetch(
-              AP_CLOUD_URL.replace(/\/$/, '') + path,
-              Object.assign({ headers: cloudHeaders() }, options)
-            );
-            const raw = await response.text();
-            let data;
-            try { data = raw ? JSON.parse(raw) : null; }
-            catch (_) { data = raw; }
-            if (!response.ok) {
-              throw Error(data && (data.message || data.msg || data.error_description)
-                || (typeof data === 'string' ? data : 'Error HTTP ' + response.status));
+                    let apCloudRefreshPromise = null;
+
+          async function cloudRefreshSession() {
+            const current = cloudSession();
+            if (!current || !current.refresh_token) {
+              throw Error('La sesión ha caducado. Inicia sesión de nuevo.');
             }
-            return data;
+
+            if (!apCloudRefreshPromise) {
+              apCloudRefreshPromise = (async () => {
+                const response = await fetch(
+                  AP_CLOUD_URL.replace(/\/$/, '') +
+                    '/auth/v1/token?grant_type=refresh_token',
+                  {
+                    method: 'POST',
+                    headers: {
+                      apikey: AP_CLOUD_KEY,
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      refresh_token: current.refresh_token
+                    })
+                  }
+                );
+
+                const raw = await response.text();
+                let data;
+                try { data = raw ? JSON.parse(raw) : null; }
+                catch (_) { data = raw; }
+
+                if (!response.ok || !data || !data.access_token) {
+                  throw Error(
+                    'No se pudo renovar la sesión. Inicia sesión de nuevo.'
+                  );
+                }
+
+                localStorage.setItem(
+                  AP_CLOUD_SESSION,
+                  JSON.stringify(data)
+                );
+                return data;
+              })().finally(() => {
+                apCloudRefreshPromise = null;
+              });
+            }
+
+            return apCloudRefreshPromise;
+          }
+
+          async function cloudRequest(path, options = {}) {
+            if (!AP_CLOUD_URL || AP_CLOUD_URL.startsWith('__')) {
+              throw Error('Falta configurar Supabase.');
+            }
+
+            const url = AP_CLOUD_URL.replace(/\/$/, '') + path;
+
+            async function sendRequest(allowRetry) {
+              const headers = Object.assign(
+                {},
+                cloudHeaders(),
+                options.headers || {}
+              );
+
+              const session = cloudSession();
+              if (session && session.access_token) {
+                headers.Authorization = 'Bearer ' + session.access_token;
+              }
+
+              const response = await fetch(
+                url,
+                Object.assign({}, options, { headers })
+              );
+
+              if (
+                response.status === 401 &&
+                allowRetry &&
+                cloudSession() &&
+                cloudSession().refresh_token
+              ) {
+                await cloudRefreshSession();
+                return sendRequest(false);
+              }
+
+              const raw = await response.text();
+              let data;
+              try { data = raw ? JSON.parse(raw) : null; }
+              catch (_) { data = raw; }
+
+              if (!response.ok) {
+                throw Error(
+                  data && (data.message || data.msg || data.error_description)
+                  || (typeof data === 'string'
+                    ? data
+                    : 'Error HTTP ' + response.status)
+                );
+              }
+
+              return data;
+            }
+
+            return sendRequest(true);
           }
           function cloudRequireSession() {
             const session = cloudSession();
