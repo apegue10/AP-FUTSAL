@@ -125,6 +125,47 @@ function renderStats(){
  document.getElementById('career-stats-body').innerHTML=[...agg.values()].sort((a,b)=>Number(a.number)-Number(b.number)).map(a=>`<tr><td>#${esc(a.number)} ${esc(a.name)}</td><td>${a.matches}</td><td>${formatTime(a.seconds)}</td><td>${a.goals}</td><td>${a.assists}</td><td>${a.gf}</td><td>${a.ga}</td><td>${a.yellows}</td><td>${a.doubleYellows}</td><td>${a.reds}</td></tr>`).join('')||'<tr><td colspan="10">Todavía no hay estadísticas registradas.</td></tr>';
  const history=[...S.matchHistory];if(matchHasActivity())history.push(snapshotMatch('Partido actual',false));document.getElementById('match-history-body').innerHTML=history.slice().reverse().map(m=>`<tr><td>${esc(m.dateLabel||m.date||'—')}</td><td>${esc(m.venue||'—')}</td><td>${esc(m.teamName||'Equipo')}</td><td>${esc(m.rivalName||'—')}</td><td>${esc(m.competition||'—')}</td><td>${m.scoreNos??0} - ${m.scoreRiv??0}${m.status==='actual'?' (actual)':''}</td><td>${(m.events||[]).length}</td><td>${m.status==='actual'?'—':`<button class="primary small" onclick="viewSavedMatch('${m.id}')">Ver estadísticas</button> <button class="danger small" onclick="deleteSavedMatch('${m.id}')">Eliminar</button>`}</td></tr>`).join('')||'<tr><td colspan="8">Los partidos guardados aparecerán aquí.</td></tr>';
 }
+  function viewSavedMatch(id){
+ const m=S.matchHistory.find(x=>String(x.id)===String(id));
+ if(!m)return;
+ const playerName=id=>{
+  const p=(m.players||[]).find(x=>String(x.playerId)===String(id));
+  return p?'#'+p.number+' '+p.name:'—';
+ };
+ document.getElementById('saved-match-info').innerHTML=
+  `<p><strong>${esc(m.dateLabel||m.date||'')}</strong> · ${esc(m.venue||'')}</p>
+  <p><strong>${esc(m.teamName||'Equipo')} ${m.scoreNos??0} - ${m.scoreRiv??0} ${esc(m.rivalName||'Rival')}</strong></p>
+  <p>Competición: ${esc(m.competition||'—')} · Faltas: ${m.foulsNos||0} - ${m.foulsRiv||0}</p>`;
+ document.getElementById('saved-match-players').innerHTML=
+  (m.players||[]).slice().sort((a,b)=>Number(a.number)-Number(b.number)).map(p=>
+   `<tr><td>#${esc(p.number)} ${esc(p.name)}</td>
+   <td>${p.goals||0}</td><td>${p.assists||0}</td>
+   <td>${formatTime((p.secondsP1||0)+(p.secondsP2||0))}</td>
+   <td>${formatTime(p.secondsP1||0)}</td><td>${formatTime(p.secondsP2||0)}</td>
+   <td>${p.yellows||0}</td><td>${p.doubleYellows||0}</td><td>${p.reds||0}</td>
+   <td>${p.goalsFor||0}</td><td>${p.goalsAgainst||0}</td></tr>`
+  ).join('')||'<tr><td colspan="11">No hay estadísticas individuales.</td></tr>';
+ document.getElementById('saved-match-events').innerHTML=
+  (m.events||[]).map(e=>{
+   let detail='';
+   if(e.type==='Gol a favor'||e.type==='Gol en contra'){
+    detail=(e.scorer?' · Goleador: '+esc(playerName(e.scorer)):'')+
+     (e.assist?' · Asistencia: '+esc(playerName(e.assist)):'')+
+     (e.note?' · '+esc(e.note):'');
+   }else if(e.type==='Cambio'){
+    detail=' · Sale: '+esc(playerName(e.outgoing))+' · Entra: '+esc(playerName(e.incoming));
+   }else if(e.type==='Acción de jugador'){
+    detail=' · '+esc(playerName(e.playerId))+': '+esc(e.action||'');
+   }
+   return `<div class="event"><strong>${esc(e.type||'Evento')}</strong> · ${esc(e.period||'')}ª parte · ${esc(e.time||'')}${detail}</div>`;
+  }).join('')||'<p>No hay eventos registrados.</p>';
+ document.getElementById('match-history-body').closest('.table-wrap').style.display='none';
+ document.getElementById('saved-match-detail').style.display='block';
+}
+function closeSavedMatch(){
+ document.getElementById('saved-match-detail').style.display='none';
+ document.getElementById('match-history-body').closest('.table-wrap').style.display='';
+}
 function matchHasActivity(){return (S.events||[]).length>0||S.scoreNos>0||S.scoreRiv>0||S.players.some(p=>(p.secondsP1||0)+(p.secondsP2||0)>0)}
 function snapshotMatch(label='Partido',archived=true){const date=new Date();return {id:label==='Partido actual'?'current':('m-'+date.getTime()),date:date.toISOString(),dateLabel:date.toLocaleDateString('es-ES'),teamName:S.teamName||'Equipo',rivalName:S.rivalName||'Rival',competition:S.competition||'',venue:S.venue||'Local',scoreNos:S.scoreNos,scoreRiv:S.scoreRiv,foulsNos:S.foulsNos||0,foulsRiv:S.foulsRiv||0,status:archived?'archived':'actual',events:JSON.parse(JSON.stringify(S.events||[])),players:S.players.map(p=>({playerId:p.id,number:p.number,name:p.name,secondsP1:p.secondsP1||0,secondsP2:p.secondsP2||0,goals:p.goals||0,assists:p.assists||0,goalsFor:p.goalsFor||0,goalsAgainst:p.goalsAgainst||0,yellows:p.yellows||0,doubleYellows:p.doubleYellows||0,reds:p.reds||0}))}}
 function archiveCurrentMatch(){if(!matchHasActivity())return;const m=snapshotMatch('Partido',true);m.id='m-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);S.matchHistory.push(m)}
