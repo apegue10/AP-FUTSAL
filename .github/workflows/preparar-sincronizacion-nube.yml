@@ -316,55 +316,205 @@ jobs:
               cloudStatus('cloud-team-status', 'Equipo: ' + team.name +
                 ' · Codigo: ' + team.invite_code);
           }
+                    const AP_CLOUD_PENDING = 'AP_FUTSAL_CLOUD_PENDING';
+
+          function cloudPendingMatches() {
+            try {
+              const value = JSON.parse(localStorage.getItem(AP_CLOUD_PENDING) || '[]');
+              return Array.isArray(value) ? value : [];
+            } catch (e) {
+              return [];
+            }
+          }
+
+          async function apCloudUploadState(manual) {
+            const session = cloudRequireSession();
+            const team = cloudTeam();
+
+            if (!team?.id) throw Error('Crea un equipo o unete a uno primero.');
+
+            const pending = cloudPendingMatches();
+
+            if (!manual && !pending.length) return;
+
+            if (manual && !confirm(
+              'Se compartiran la plantilla y los datos actuales del equipo e historial. ¿Continuar?'
+            )) return;
+
+            // Comprobar quién es el dispositivo registrador.
+            const rows = await cloudRequest(
+              '/rest/v1/team_app_data?team_id=eq.' +
+              encodeURIComponent(team.id) +
+              '&select=updated_by'
+            );
+
+            if (rows?.length && rows[0].updated_by !== session.user.id) {
+              throw Error(
+                'Este equipo ya tiene otro dispositivo registrador. ' +
+                'Puedes descargar sus datos, pero no sobrescribirlos.'
+              );
+            }
+
+            // Guardar una copia estable del estado en el momento de la subida.
+            const stateSnapshot = JSON.parse(JSON.stringify(S));
+            const templateRaw = localStorage.getItem(TEMPLATE_KEY);
+
+            const payload = {
+              format: 1,
+              state: stateSnapshot,
+              template: templateRaw ? JSON.parse(templateRaw) : null
+            };
+
+            const body = {
+              team_id: team.id,
+              payload,
+              updated_by: session.user.id,
+              updated_at: new Date().toISOString()
+            };
+
+            await cloudRequest('/rest/v1/team_app_data?on_conflict=team_id', {
+              method: 'POST',
+              headers: cloudHeaders({
+                Prefer: 'resolution=merge-duplicates,return=minimal'
+              }),
+              body: JSON.stringify(body)
+            });
+
+            // Quitar solamente los partidos que estaban pendientes al iniciar la subida.
+            if (pending.length) {
+              const currentPending = cloudPendingMatches();
+              const remaining = currentPending.filter(id => !pending.includes(id));
+              localStorage.setItem(AP_CLOUD_PENDING, JSON.stringify(remaining));
+            }
+
+            cloudStatus(
+              'cloud-team-status',
+              pending.length
+                ? 'Partidos pendientes sincronizados correctamente.'
+                : 'Datos subidos al equipo correctamente.'
+            );
+          }
+
           async function cloudPush() {
             try {
-              const session = cloudRequireSession();
-              const team = cloudTeam();
-              if (!team?.id) throw Error('Crea un equipo o unete a uno primero.');
-              if (!confirm('Se compartiran la plantilla y los datos actuales del partido e historial con el equipo. ¿Continuar?')) return;
-              const templateRaw = localStorage.getItem(TEMPLATE_KEY);
-              const payload = {
-                format: 1,
-                state: S,
-                template: templateRaw ? JSON.parse(templateRaw) : null
-              };
-              const body = {
-                team_id: team.id,
-                payload,
-                updated_by: session.user.id,
-                updated_at: new Date().toISOString()
-              };
-              await cloudRequest('/rest/v1/team_app_data?on_conflict=team_id', {
-                method: 'POST',
-                headers: cloudHeaders({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
-                body: JSON.stringify(body)
-              });
-              cloudStatus('cloud-team-status', 'Datos subidos al equipo correctamente.');
+              await apCloudUploadState(true);
             } catch (e) {
               cloudStatus('cloud-team-status', 'Error al subir: ' + e.message);
             }
           }
+
+          async function cloudSyncPending() {
+            try {
+              if (!navigator.onLine) return;
+              if (!cloudPendingMatches().length) return;
+
+              await apCloudUploadState(false);
+            } catch (e) {
+              cloudStatus(
+                'cloud-team-status',
+                'Hay partidos pendientes de sincronizar: ' + e.message
+              );
+            }
+          }
+
           async function cloudPull() {
             try {
               cloudRequireSession();
+
               const team = cloudTeam();
               if (!team?.id) throw Error('Crea un equipo o unete a uno primero.');
-              if (!confirm('Descargar reemplazara los datos locales. Haz antes una copia JSON. ¿Continuar?')) return;
-              const rows = await cloudRequest('/rest/v1/team_app_data?team_id=eq.' +
-                encodeURIComponent(team.id) + '&select=payload,updated_at');
-              if (!rows?.length) throw Error('No hay datos compartidos todavia. Sube primero los datos desde el dispositivo que los tenga.');
+
+              if (cloudPendingMatches().length) {
+                throw Error(
+                  'Tienes partidos pendientes de subir. Sincronizalos antes de descargar para no perderlos.'
+                );
+              }
+
+              if (!confirm(
+                'Descargar reemplazara los datos locales. Haz antes una copia JSON. ¿Continuar?'
+              )) return;
+
+              const rows = await cloudRequest(
+                '/rest/v1/team_app_data?team_id=eq.' +
+                encodeURIComponent(team.id) +
+                '&select=payload,updated_at'
+              );
+
+              if (!rows?.length) {
+                throw Error(
+                  'No hay datos compartidos todavia. Sube primero los datos desde el dispositivo registrador.'
+                );
+              }
+
               const payload = rows[0].payload;
-              if (!payload?.state) throw Error('Los datos compartidos no tienen el formato esperado.');
+
+              if (!payload?.state) {
+                throw Error('Los datos compartidos no tienen el formato esperado.');
+              }
+
               localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.state));
-              if (payload.template)
+
+              if (payload.template) {
                 localStorage.setItem(TEMPLATE_KEY, JSON.stringify(payload.template));
+              }
+
               load();
               renderAll();
+
               cloudStatus('cloud-team-status', 'Datos descargados correctamente.');
             } catch (e) {
               cloudStatus('cloud-team-status', 'Error al descargar: ' + e.message);
             }
           }
+
+          // Detectar el archivado de un partido y guardarlo en la cola local.
+          if (typeof archiveCurrentMatch === 'function' &&
+              !window.apCloudArchiveWrapped) {
+
+            const apOriginalArchiveCurrentMatch = archiveCurrentMatch;
+
+            archiveCurrentMatch = function() {
+              const before = (S.matchHistory || []).length;
+
+              apOriginalArchiveCurrentMatch.apply(this, arguments);
+
+              const after = (S.matchHistory || []).length;
+
+              if (after > before) {
+                const match = S.matchHistory[S.matchHistory.length - 1];
+
+                if (match?.id) {
+                  const pending = cloudPendingMatches();
+
+                  if (!pending.includes(match.id)) {
+                    pending.push(match.id);
+                    localStorage.setItem(
+                      AP_CLOUD_PENDING,
+                      JSON.stringify(pending)
+                    );
+                  }
+
+                  if (navigator.onLine) {
+                    setTimeout(() => cloudSyncPending(), 1500);
+                  } else {
+                    cloudStatus(
+                      'cloud-team-status',
+                      'Partido guardado en este dispositivo. Se sincronizara al recuperar Internet.'
+                    );
+                  }
+                }
+              }
+            };
+
+            window.apCloudArchiveWrapped = true;
+          }
+
+          // Reintentar automáticamente cuando vuelva la conexión.
+          window.addEventListener('online', () => {
+            cloudSyncPending();
+          });
+
+          window.addEventListener('load', cloudRefreshStatus);
           window.addEventListener('load', cloudRefreshStatus);
           """
               tail = '</script></body></html>'
