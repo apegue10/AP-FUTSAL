@@ -515,7 +515,6 @@ jobs:
           });
 
           window.addEventListener('load', cloudRefreshStatus);
-          window.addEventListener('load', cloudRefreshStatus);
           """
               tail = '</script></body></html>'
               if tail not in s:
