@@ -15,7 +15,7 @@ jobs:
       - name: Descargar rama de trabajo
         uses: actions/checkout@v4
         with:
-          ref: android-nube-ultima-version
+          ref: ${{ github.ref_name }}
 
       - name: Preparar Java
         uses: actions/setup-java@v4
