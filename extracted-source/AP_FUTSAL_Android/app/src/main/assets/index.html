@@ -302,6 +302,38 @@ function toggleSavedMatchEdit(){
  document.getElementById('saved-match-save-button').style.display='';
  document.getElementById('saved-match-cancel-button').style.display='';
 }
+  function updateSavedMatchPlayerField(input){
+ if(!savedMatchEditDraft)return;
+
+ const id=input.dataset.playerId;
+ const field=input.dataset.field;
+ const player=(savedMatchEditDraft.players||[]).find(
+  p=>String(p.playerId)===String(id)
+ );
+
+ if(!player)return;
+
+ let value;
+
+ if(field==='secondsP1'||field==='secondsP2'){
+  const match=input.value.trim().match(/^(\d+):([0-5]\d)$/);
+  if(!match){
+   alert('Introduce el tiempo en formato MM:SS. Ejemplo: 12:35');
+   input.value=formatTime(player[field]||0);
+   return;
+  }
+  value=Number(match[1])*60+Number(match[2]);
+ }else{
+  value=Number(input.value);
+  if(!Number.isFinite(value)||value<0||!Number.isInteger(value)){
+   alert('Introduce un número entero igual o superior a cero.');
+   input.value=player[field]||0;
+   return;
+  }
+ }
+
+ player[field]=value;
+  }
 function closeSavedMatch(){
  document.getElementById('saved-match-detail').style.display='none';
  document.getElementById('match-history-body').closest('.table-wrap').style.display='';
