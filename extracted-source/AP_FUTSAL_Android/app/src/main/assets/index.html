@@ -191,6 +191,32 @@ function setPeriod(p){if(S.period===p)return;syncClock();S.running=false;S.start
 function changeScore(team,d){syncClock();if(d>0){registerTeamGoal(team);return}const type=team==='nos'?'Gol a favor':'Gol en contra';const ev=S.events.find(e=>e.type===type);if(ev){undoEvent(ev.id,false);return}const k=team==='nos'?'scoreNos':'scoreRiv';if(S[k]>0)S[k]--;save();renderAll()}
 function changeFouls(team,d){const k=team==='nos'?'foulsNos':'foulsRiv';S[k]=Math.max(0,(Number(S[k])||0)+d);save();renderClock()}
 function registerTeamGoal(team,scorer=null,assist=null,note=''){const t=currentTime();const quintet=[...S.slots];if(team==='nos'){S.scoreNos++;quintet.forEach(id=>{const p=S.players.find(x=>x.id===id);if(p)p.goalsFor=(p.goalsFor||0)+1});if(scorer){const p=S.players.find(x=>x.id===scorer);if(p)p.goals++}if(assist){const p=S.players.find(x=>x.id===assist);if(p)p.assists++}}else{S.scoreRiv++;quintet.forEach(id=>{const p=S.players.find(x=>x.id===id);if(p)p.goalsAgainst=(p.goalsAgainst||0)+1})}S.events.unshift({id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),type:team==='nos'?'Gol a favor':'Gol en contra',...t,scoreNos:S.scoreNos,scoreRiv:S.scoreRiv,scorer,assist,note,quintet});save();renderAll()}
+  function registerLivePenalty(result){
+ const playerId=Number(document.getElementById('live-penalty-player').value);
+ if(!playerId){
+  alert('Selecciona primero al jugador.');
+  return;
+ }
+
+ const p=S.players.find(x=>x.id===playerId);
+ if(!p||!p.called||p.ejected){
+  alert('El jugador no está disponible para lanzar.');
+  return;
+ }
+
+ const t=currentTime();
+ const ev={
+  id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),
+  type:'Penalti',
+  playerId,
+  result,
+  ...t
+ };
+
+ S.events.unshift(ev);
+ save();
+ renderAll();
+  }
 function currentTime(){syncClock();return stamp()}
 function chooseSlot(i){S.selectedSlot=i;const id=S.slots[i];S.selectedPlayerId=id||null;if(id){const p=S.players.find(x=>x.id===id);document.getElementById('selected-slot-label').textContent='Seleccionado: #'+p.number+' '+p.name+'. Toca directamente al jugador del banquillo para hacer el cambio, o elige una acción.';document.getElementById('player-actions').style.display='block';document.getElementById('action-player-title').textContent='Acciones · #'+p.number+' '+p.name;}else{document.getElementById('selected-slot-label').textContent='Posición vacía seleccionado. Toca directamente al jugador del banquillo para colocarlo.';document.getElementById('player-actions').style.display='none'}renderCourt()}
 function setOnCourt(id){const p=S.players.find(x=>x.id===id);if(!p||!p.called||p.ejected)return;if(S.slots.includes(id)){chooseSlot(S.slots.indexOf(id));return}if(S.selectedSlot===null||S.selectedSlot===undefined){alert('Primero toca la posición o jugador que va a salir.');return}syncClock();const slot=S.selectedSlot;const outgoing=S.slots[slot];S.slots[slot]=id;const ev={id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),type:'Cambio',...stamp(),slot,outgoing:outgoing,incoming:id,quintet:[...S.slots]};S.events.unshift(ev);S.selectedSlot=null;S.selectedPlayerId=null;document.getElementById('player-actions').style.display='none';document.getElementById('selected-slot-label').textContent='Cambio registrado a '+ev.time+' de la '+ev.period+'ª parte.';save();renderAll()}
