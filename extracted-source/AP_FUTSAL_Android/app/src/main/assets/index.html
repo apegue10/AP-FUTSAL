@@ -1221,6 +1221,7 @@ function deleteCompetition(name){const usedInHistory=S.matchHistory.some(m=>(m.c
 function saveSettings(){const teamInput=document.getElementById('team-name');const rivalInput=document.getElementById('rival-name');const competitionInput=document.getElementById('competition');S.teamName=teamInput.value.trim()||'Nosotros';S.rivalName=rivalInput.value.trim()||'Rival';S.competition=competitionInput.value.trim();const venueInput=document.getElementById('venue');S.venue=venueInput?venueInput.value:'Local';save();renderClock();const status=document.getElementById('storage-status');if(status)status.textContent='Datos del partido guardados correctamente.';}
 function changeHalfLength(){if(S.running){alert('Pausa el cronómetro antes de cambiar la duración.');document.getElementById('half-length').value=S.halfLength;return}S.halfLength=Number(document.getElementById('half-length').value);S.remaining=S.halfLength*60;S.startRemaining=S.remaining;save();renderAll()}
 function exportCSV(){const rows=[['Dorsal','Nombre','Tiempo total (MM:SS)','1a parte (MM:SS)','2a parte (MM:SS)','Goles','Asistencias','Goles a favor en pista','Goles en contra en pista','Tarjetas'],...S.players.map(p=>[p.number,p.name,formatTime(p.secondsP1+p.secondsP2),formatTime(p.secondsP1),formatTime(p.secondsP2),p.goals,p.assists,p.goalsFor||0,p.goalsAgainst||0,(p.yellows||0)+' amarillas; dobles '+(p.doubleYellows||0)+'; rojas '+(p.reds||0)])];download('\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n'),'estadisticas-futsal.csv','text/csv;charset=utf-8')}
+
 function exportPDF(sectionId='view-estadisticas'){
  syncClock();
  renderStats();
@@ -1234,11 +1235,23 @@ function exportPDF(sectionId='view-estadisticas'){
  const title=section.querySelector('h2')?.textContent?.trim()||'Estadísticas';
 
  let table=null;
+ let matchInfo='';
 
  if(sectionId==='saved-match-report'){
   table=document.getElementById('saved-match-players')?.closest('table');
+  matchInfo=document.getElementById('saved-match-info')?.innerHTML||'';
  }else if(sectionId==='view-estadisticas'){
   table=document.getElementById('stats-body')?.closest('table');
+
+  matchInfo=`
+   <div class="match-info">
+    <p><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES')}</p>
+    <p><strong>Equipo:</strong> ${esc(S.teamName||'Equipo')}</p>
+    <p><strong>Rival:</strong> ${esc(S.rivalName||'Rival')}</p>
+    <p><strong>Competición:</strong> ${esc(S.competition||'—')}</p>
+    <p><strong>Local/visitante:</strong> ${esc(S.venue||'Local')}</p>
+    <p><strong>Resultado:</strong> ${S.scoreNos??0} - ${S.scoreRiv??0}</p>
+   </div>`;
  }else if(sectionId==='view-generales'){
   table=document.getElementById('career-stats-body')?.closest('table');
  }else{
@@ -1251,6 +1264,7 @@ function exportPDF(sectionId='view-estadisticas'){
  }
 
  const safeTitle='AP FUTSAL - '+title;
+
  const report=`<!doctype html>
  <html lang="es">
  <head>
@@ -1259,37 +1273,51 @@ function exportPDF(sectionId='view-estadisticas'){
  <title>${safeTitle}</title>
  <style>
  *{box-sizing:border-box}
- html,body{background:#fff!important;color:#111!important}
+ html,body{
+  background:#fff!important;
+  color:#111!important;
+ }
  body{
-  font:14px Arial,sans-serif;
-  margin:12px;
+  font:16px Arial,sans-serif;
+  margin:14px;
   color:#111;
   background:#fff;
  }
  h1{
-  font-size:22px;
-  margin:0 0 16px;
+  font-size:26px;
+  margin:0 0 18px;
   color:#111;
+ }
+ .match-info{
+  font-size:16px;
+  line-height:1.5;
+  margin:0 0 20px;
+  padding:10px 14px;
+  border:1px solid #777;
+ }
+ .match-info p{
+  margin:4px 0;
  }
  table{
   width:100%;
   border-collapse:collapse;
   table-layout:auto;
-  font-size:12px;
+  font-size:14px;
   margin-bottom:12px;
   color:#111!important;
   background:#fff!important;
  }
  th,td{
-  border:1px solid #777;
-  padding:9px 7px;
+  border:1px solid #555;
+  padding:12px 9px;
   text-align:center;
   white-space:normal;
   color:#111!important;
   background:#fff!important;
+  line-height:1.35;
  }
  th{
-  font-size:12px;
+  font-size:14px;
   font-weight:bold;
   background:#e8e8e8!important;
  }
@@ -1301,7 +1329,7 @@ function exportPDF(sectionId='view-estadisticas'){
  }
  @page{
   size:A4 landscape;
-  margin:8mm;
+  margin:7mm;
  }
  tr{
   break-inside:avoid;
@@ -1310,6 +1338,7 @@ function exportPDF(sectionId='view-estadisticas'){
  </head>
  <body>
  <h1>${safeTitle}</h1>
+ ${matchInfo}
  ${table.outerHTML}
  </body>
  </html>`;
@@ -1326,7 +1355,8 @@ function exportPDF(sectionId='view-estadisticas'){
   w.document.write(report+'<script>window.onload=()=>setTimeout(()=>window.print(),500);<\/script>');
   w.document.close();
  }
-} 
+}
+
 function exportBackup(){syncClock();save();download(JSON.stringify(S,null,2),'copia-futsal-'+new Date().toISOString().slice(0,10)+'.json','application/json')}
 function importBackup(e){const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.players)||!Array.isArray(d.slots))throw Error('Formato incorrecto');if(!confirm('Restaurar esta copia sustituirá los datos actuales. ¿Continuar?'))return;S={...S,...d,running:false,startedAt:null,endAt:null,lastElapsedSynced:0};S.matchHistory=Array.isArray(S.matchHistory)?S.matchHistory:[];S.competitions=Array.isArray(S.competitions)?S.competitions:[];[S.competition,...S.matchHistory.map(m=>m.competition)].filter(v=>typeof v==='string'&&v.trim()).forEach(c=>{if(!S.competitions.some(x=>x.toLocaleLowerCase('es-ES')===c.trim().toLocaleLowerCase('es-ES')))S.competitions.push(c.trim())});save();renderAll();alert('Copia restaurada.')}catch(err){alert('No se pudo restaurar: '+err.message)}e.target.value=''};rd.readAsText(f)}
 function download(data,name,type){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([data],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
