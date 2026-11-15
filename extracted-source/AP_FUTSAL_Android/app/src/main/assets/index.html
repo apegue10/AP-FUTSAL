@@ -346,7 +346,7 @@ let savedMatchEditing=false;
    <td>${field('goalsFor',p.goalsFor)}</td>
    <td>${field('goalsAgainst',p.goalsAgainst)}</td>
   </tr>`;
- }).join('')||'<tr><td colspan="11">No hay estadísticas individuales.</td></tr>';
+ }).join('')||'<tr><td colspan="'+(m.extraTimeOccurred?12:11)+'">No hay estadísticas individuales.</td></tr>';
   }
   function viewSavedMatch(id){
  const m=S.matchHistory.find(x=>String(x.id)===String(id));
