@@ -728,6 +728,7 @@ function manualMatchNextToStats(){
    <input type="text" class="manual-stat-p1" data-index="${i}" value="00:00" placeholder="12:35">
    <p>Minutos segunda parte (MM:SS)</p>
    <input type="text" class="manual-stat-p2" data-index="${i}" value="00:00" placeholder="12:35">
+      ${window.manualMatchDetails.extraTimeOccurred?'<p>Minutos de prórroga (MM:SS)</p><input type="text" class="manual-stat-extra" data-index="'+i+'" value="00:00" placeholder="05:00">':''}
    <p>Goles</p>
    <input type="number" class="manual-stat-goals" data-index="${i}" min="0" value="0">
    <p>Asistencias</p>
