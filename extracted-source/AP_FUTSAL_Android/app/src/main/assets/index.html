@@ -783,12 +783,13 @@ function manualMatchCollectStats(){
    return false;
   }
 
-  const stat={
+    const stat={
    playerId:p.playerId,
    number:p.number,
    name:p.name,
    secondsP1,
-   secondsP2
+   secondsP2,
+   secondsExtra
   };
 
   for(const [key,selector] of fields){
