@@ -1310,7 +1310,7 @@ alert('Partido manual añadido al historial. Queda pendiente de sincronización 
 }
 function matchHasActivity(){return !!S.extraTimeOccurred||(S.events||[]).length>0||S.scoreNos>0||S.scoreRiv>0||S.players.some(p=>(p.secondsP1||0)+(p.secondsP2||0)+(p.secondsP3||0)+(p.secondsP4||0)>0)}
 function snapshotMatch(label='Partido',archived=true){const date=new Date();return {id:label==='Partido actual'?'current':('m-'+date.getTime()),date:date.toISOString(),dateLabel:date.toLocaleDateString('es-ES'),teamName:S.teamName||'Equipo',rivalName:S.rivalName||'Rival',competition:S.competition||'',venue:S.venue||'Local',scoreNos:S.scoreNos,scoreRiv:S.scoreRiv,foulsNos:S.foulsNos||0,foulsRiv:S.foulsRiv||0,status:archived?'archived':'actual',extraTimeOccurred:!!S.extraTimeOccurred,
-roster:S.players.filter(p=>p.called).map(p=>({
+penaltiesOccurred:(S.events||[]).some(e=>e.type==='Penalti'),                                     roster:S.players.filter(p=>p.called).map(p=>({
  playerId:p.id,
  number:p.number,
  name:p.name
