@@ -682,6 +682,167 @@ function manualMatchCollectStats(){
  window.manualMatchPlayers=players;
  return true;
 }
+
+function manualMatchBackToDetails(){
+ document.getElementById('manual-match-stats-step').style.display='none';
+ document.getElementById('manual-match-details-step').style.display='block';
+}
+
+function saveManualMatchForm(){
+ if(!window.manualMatchDetails||!Array.isArray(window.manualMatchRoster)||!window.manualMatchRoster.length){
+  alert('Faltan los datos del partido o la convocatoria.');
+  return;
+ }
+
+ if(!manualMatchCollectStats())return;
+
+ const details=window.manualMatchDetails;
+ const players=window.manualMatchPlayers||[];
+ const roster=window.manualMatchRoster.map(p=>({
+  playerId:p.playerId,
+  number:p.number,
+  name:p.name
+ }));
+
+ const totalGoals=players.reduce((sum,p)=>sum+(p.goals||0),0);
+ const totalAssists=players.reduce((sum,p)=>sum+(p.assists||0),0);
+
+ if(totalGoals>details.scoreNos){
+  alert('La suma de los goles individuales no puede superar los goles del marcador.');
+  return;
+ }
+
+ if(totalAssists>details.scoreNos){
+  alert('La suma de las asistencias no puede superar los goles de nuestro equipo.');
+  return;
+ }
+
+ for(const p of players){
+  if((p.doubleYellows||0)*2>(p.yellows||0)){
+   alert('Las dobles amarillas de #'+p.number+' '+p.name+' no pueden superar la mitad de sus tarjetas amarillas.');
+   return;
+  }
+ }
+
+ const events=[];
+ let eventNumber=0;
+ const eventId=()=> 'manual-event-'+Date.now()+'-'+(++eventNumber);
+
+ players.forEach(p=>{
+  const simpleYellows=Math.max(0,(p.yellows||0)-2*(p.doubleYellows||0));
+
+  const addCards=(action,count)=>{
+   for(let i=0;i<count;i++){
+    events.push({
+     id:eventId(),
+     type:'Acción de jugador',
+     action,
+     playerId:p.playerId,
+     period:null,
+     time:'Sin registrar',
+     quintet:[]
+    });
+   }
+  };
+
+  addCards('Amarilla',simpleYellows);
+  addCards('Doble amarilla',p.doubleYellows||0);
+  addCards('Roja directa',p.reds||0);
+ });
+
+ const scorers=[];
+ const assists=[];
+
+ players.forEach(p=>{
+  for(let i=0;i<(p.goals||0);i++)scorers.push(p.playerId);
+  for(let i=0;i<(p.assists||0);i++)assists.push(p.playerId);
+ });
+
+ let currentNos=0;
+ let currentRiv=0;
+
+ for(let i=0;i<details.scoreNos;i++){
+  currentNos++;
+
+  events.push({
+   id:eventId(),
+   type:'Gol a favor',
+   period:null,
+   time:'Sin registrar',
+   scorer:scorers[i]??null,
+   assist:assists[i]??null,
+   quintet:[],
+   scoreNos:currentNos,
+   scoreRiv:currentRiv
+  });
+ }
+
+ for(let i=0;i<details.scoreRiv;i++){
+  currentRiv++;
+
+  events.push({
+   id:eventId(),
+   type:'Gol en contra',
+   period:null,
+   time:'Sin registrar',
+   scorer:null,
+   assist:null,
+   quintet:[],
+   scoreNos:currentNos,
+   scoreRiv:currentRiv
+  });
+ }
+
+ const match={
+  id:'manual-'+Date.now(),
+  date:new Date(details.date+'T12:00:00').toISOString(),
+  dateLabel:details.dateLabel,
+  teamName:details.teamName,
+  rivalName:details.rivalName,
+  competition:details.competition,
+  venue:details.venue,
+  scoreNos:details.scoreNos,
+  scoreRiv:details.scoreRiv,
+  foulsNos:details.foulsNos,
+  foulsRiv:details.foulsRiv,
+  status:'archived',
+  source:'manual',
+  manual:true,
+  events,
+  players,
+  roster
+ };
+
+ if(!confirm('¿Guardar este partido manual en el historial?'))return;
+
+ S.matchHistory.push(match);
+ save();
+
+ try{
+  const key='AP_FUTSAL_CLOUD_PENDING';
+  const pending=JSON.parse(localStorage.getItem(key)||'[]');
+
+  if(!pending.includes(match.id))pending.push(match.id);
+
+  localStorage.setItem(key,JSON.stringify(pending));
+
+  if(navigator.onLine && typeof cloudSyncPending==='function'){
+   setTimeout(()=>cloudSyncPending(),1500);
+  }
+ }catch(e){
+  console.warn('No se pudo marcar la sincronización:',e);
+ }
+
+ document.getElementById('manual-match-screen').style.display='none';
+
+ window.manualMatchRoster=[];
+ window.manualMatchPlayers=[];
+ window.manualMatchDetails=null;
+
+ renderStats();
+
+ alert('Partido manual guardado en el historial. Queda pendiente de sincronización si no hay conexión.');
+    }
   
 function createManualMatchLegacy(){
  const ask=(label,value='')=>prompt(label,value);
