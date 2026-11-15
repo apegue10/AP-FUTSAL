@@ -35,23 +35,7 @@
 <section id="view-plantilla" class="view"><div class="layout"><div class="panel"><h2>Editar jugadores</h2><div class="grid2"><div class="field"><label>Dorsal</label><input id="new-number" type="number" min="0" max="99" placeholder="10"></div><div class="field"><label>Nombre</label><input id="new-name" placeholder="Nombre de jugador"></div></div><button class="primary" onclick="addPlayer()">+ Añadir jugador</button><button class="blue" onclick="saveTemplate()" style="width:100%;margin-top:8px">Guardar plantilla para próximos partidos</button><p id="template-status" class="muted" style="font-size:12px;margin:8px 0">Los cambios se aplican al momento. Guarda la plantilla para conservarla como plantilla base.</p><div id="roster-editor" class="bench-list" style="margin-top:12px"></div></div><div class="panel"><h2>Convocatoria</h2><p class="muted" style="font-size:13px">Marca la casilla de cada jugador que puede participar en este partido. Máximo 14.</p><div id="callup-editor" class="bench-list"></div></div></div></section>
 <section id="view-estadisticas" class="view"><div class="panel"><h2>Estadísticas del partido actual</h2><div class="tools"><button class="primary" onclick="exportPDF('view-estadisticas')">Exportar estadísticas PDF</button><button onclick="exportCSV()">Exportar CSV para Excel</button><button onclick="exportBackup()">Copia de seguridad JSON</button><label class="small" style="background:#26364b;border-radius:10px;padding:8px 10px;cursor:pointer">Restaurar copia<input type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)"></label></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Jugador</th><th>Tiempo total</th><th>1.ª parte</th><th>2.ª parte</th><th>Goles</th><th>Asist.</th><th>Goles a favor en pista</th><th>Goles en contra en pista</th><th>Tarjetas</th></tr></thead><tbody id="stats-body"></tbody></table></div></div></section>
 <section id="view-generales" class="view"><div class="panel"><h2>Estadísticas generales por competición</h2><p class="muted" style="font-size:13px">Elige una competición para ver el acumulado de sus partidos. El historial conserva todos los encuentros.</p><div class="field" style="max-width:420px"><label for="stats-competition-filter">Ver estadísticas de</label><select id="stats-competition-filter" onchange="renderStats()"><option value="__all__">Todas las competiciones</option></select></div><div class="tools"><button class="primary" onclick="exportPDF('view-generales')">Exportar estadísticas generales a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Jugador</th><th>Convocatorias</th><th>Partidos con datos</th><th>Tiempo total</th><th>Goles</th><th>Asist.</th><th>Goles a favor en pista</th><th>Goles en contra en pista</th><th>Amarillas</th><th>Doble amarilla</th><th>Rojas</th></tr></thead><tbody id="career-stats-body"></tbody></table></div></div></section>
-<section id="view-historial" class="view"><div class="panel"><h2>Historial de partidos</h2><p class="muted" style="font-size:13px">Los partidos guardados aparecerán aquí. Puedes eliminar individualmente los partidos de prueba.</p><div class="tools"><button class="primary" onclick="createManualMatch()">+ Crear partido manual</button><button class="primary" onclick="exportPDF('view-historial')">Exportar historial a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Fecha</th><th>Local/visitante</th><th>Equipo</th><th>Rival</th><th>Competición</th><th>Resultado</th><th>Eventos</th><th>Acciones</th></tr></thead><tbody id="match-history-body"></tbody>
-</table>
-</div>
-
-<div id="saved-match-detail" style="display:none;margin-top:20px">
-  <div id="saved-match-report">
-    <h2>Estadísticas del partido</h2>
-    <div id="saved-match-info"></div>
-    <div class="tools">
-  <button class="primary" id="saved-match-edit-button" onclick="toggleSavedMatchEdit()">Editar estadísticas</button>
-  <button class="primary" id="saved-match-save-button" onclick="saveSavedMatchEdit()" style="display:none">Guardar cambios</button>
-  <button id="saved-match-cancel-button" onclick="cancelSavedMatchEdit()" style="display:none">Cancelar</button>
-  <button onclick="exportPDF('saved-match-report')">Exportar partido a PDF</button>
-  <button onclick="closeSavedMatch()">Volver al historial</button>
-    </div>
-    <h3>Estadísticas individuales</h3>
-    <div id="manual-match-screen" style="display:none;margin:20px 0;padding:15px;border:1px solid var(--border);border-radius:10px">
+<section id="view-historial" class="view"><div class="panel"><h2>Historial de partidos</h2><p class="muted" style="font-size:13px">Los partidos guardados aparecerán aquí. Puedes eliminar individualmente los partidos de prueba.</p><div class="tools"><button class="primary" onclick="createManualMatch()">+ Crear partido manual</button><button class="primary" onclick="exportPDF('view-historial')">Exportar historial a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div>    <div id="manual-match-screen" style="display:none;margin:20px 0;padding:15px;border:1px solid var(--border);border-radius:10px">
   <h2>Crear partido manual</h2>
 
   <div id="manual-match-roster-step">
@@ -112,6 +96,22 @@
     </div>
   </div>
     </div>
+  <div class="table-wrap"><table class="stats-table"><thead><tr><th>Fecha</th><th>Local/visitante</th><th>Equipo</th><th>Rival</th><th>Competición</th><th>Resultado</th><th>Eventos</th><th>Acciones</th></tr></thead><tbody id="match-history-body"></tbody>
+</table>
+</div>
+
+<div id="saved-match-detail" style="display:none;margin-top:20px">
+  <div id="saved-match-report">
+    <h2>Estadísticas del partido</h2>
+    <div id="saved-match-info"></div>
+    <div class="tools">
+  <button class="primary" id="saved-match-edit-button" onclick="toggleSavedMatchEdit()">Editar estadísticas</button>
+  <button class="primary" id="saved-match-save-button" onclick="saveSavedMatchEdit()" style="display:none">Guardar cambios</button>
+  <button id="saved-match-cancel-button" onclick="cancelSavedMatchEdit()" style="display:none">Cancelar</button>
+  <button onclick="exportPDF('saved-match-report')">Exportar partido a PDF</button>
+  <button onclick="closeSavedMatch()">Volver al historial</button>
+    </div>
+    <h3>Estadísticas individuales</h3>
     <div class="table-wrap">
       <table class="stats-table">
         <thead>
