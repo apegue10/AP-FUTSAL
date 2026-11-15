@@ -338,6 +338,64 @@ function updateSavedMatchPlayerField(input){
 
  player[field]=value;
 }
+function saveSavedMatchEdit(){
+ if(!savedMatchEditDraft||savedMatchEditId===null)return;
+
+ const index=S.matchHistory.findIndex(
+  m=>String(m.id)===String(savedMatchEditId)
+ );
+
+ if(index<0){
+  alert('No se ha encontrado el partido en el historial.');
+  return;
+ }
+
+ S.matchHistory[index].players=
+  JSON.parse(JSON.stringify(savedMatchEditDraft.players||[]));
+
+ save();
+
+ // Marcar el partido como pendiente de sincronización.
+ try{
+  const key='AP_FUTSAL_CLOUD_PENDING';
+  const pending=JSON.parse(localStorage.getItem(key)||'[]');
+
+  if(!pending.includes(savedMatchEditId)){
+   pending.push(savedMatchEditId);
+  }
+
+  localStorage.setItem(key,JSON.stringify(pending));
+
+  if(navigator.onLine && typeof cloudSyncPending==='function'){
+   setTimeout(()=>cloudSyncPending(),1500);
+  }
+ }catch(e){
+  console.warn('No se pudo marcar la sincronización:',e);
+ }
+
+ savedMatchEditing=false;
+
+ document.getElementById('saved-match-edit-button').style.display='';
+ document.getElementById('saved-match-save-button').style.display='none';
+ document.getElementById('saved-match-cancel-button').style.display='none';
+
+ renderStats();
+ viewSavedMatch(savedMatchEditId);
+
+ alert('Estadísticas actualizadas correctamente. Quedan pendientes de sincronización si no hay conexión.');
+}
+
+function cancelSavedMatchEdit(){
+ if(savedMatchEditId===null)return;
+
+ savedMatchEditing=false;
+
+ document.getElementById('saved-match-edit-button').style.display='';
+ document.getElementById('saved-match-save-button').style.display='none';
+ document.getElementById('saved-match-cancel-button').style.display='none';
+
+ viewSavedMatch(savedMatchEditId);
+}
 function closeSavedMatch(){
  document.getElementById('saved-match-detail').style.display='none';
  document.getElementById('match-history-body').closest('.table-wrap').style.display='';
