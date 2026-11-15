@@ -830,8 +830,8 @@ function manualMatchCollectStats(){
   }
 
   const hasStats=Object.keys(stat).some(key=>
-   !['playerId','number','name'].includes(key)&&stat[key]>0
-  );
+   !['playerId','number','name','penaltyAttempts'].includes(key)&&stat[key]>0
+  )||stat.penaltyAttempts.length>0;
 
   if(hasStats)players.push(stat);
  }
