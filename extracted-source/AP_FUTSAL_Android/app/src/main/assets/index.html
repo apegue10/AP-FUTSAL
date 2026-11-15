@@ -260,8 +260,9 @@ let savedMatchEditing=false;
  }).join('')||'<tr><td colspan="11">No hay estadísticas individuales.</td></tr>';
   }
   function viewSavedMatch(id){
- const m=S.matchHistory.find(x=>String(x.id)===String(id));
- if(!m)return;
+  savedMatchEditId=id;
+ savedMatchEditDraft=JSON.parse(JSON.stringify(m));
+ savedMatchEditing=false;
  const playerName=id=>{
   const p=(m.players||[]).find(x=>String(x.playerId)===String(id))
    ||(m.roster||[]).find(x=>String(x.playerId)===String(id));
