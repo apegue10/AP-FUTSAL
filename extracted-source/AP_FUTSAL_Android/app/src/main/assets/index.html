@@ -269,27 +269,44 @@ let savedMatchEditId=null;
 let savedMatchEditDraft=null;
 let savedMatchEditing=false;
   function getSavedMatchPlayers(m){
- const players=JSON.parse(JSON.stringify(m.players||[]));
- const roster=m.roster||[];
+ const dataPlayers=m.players||[];
+ const roster=Array.isArray(m.roster)?m.roster:null;
 
- for(const r of roster){
-  if(!players.some(p=>String(p.playerId)===String(r.playerId))){
-   players.push({
-    playerId:r.playerId,
-    number:r.number,
-    name:r.name,
-    goals:0,
-    assists:0,
-    secondsP1:0,
-    secondsP2:0,
-    yellows:0,
-    doubleYellows:0,
-    reds:0,
-    goalsFor:0,
-    goalsAgainst:0
-   });
-  }
+ const hasData=p=>
+  (p.goals||0)||(p.assists||0)||
+  (p.secondsP1||0)||(p.secondsP2||0)||
+  (p.yellows||0)||(p.doubleYellows||0)||
+  (p.reds||0)||(p.goalsFor||0)||(p.goalsAgainst||0);
+
+ let players;
+
+ if(roster){
+  players=roster.map(r=>{
+   const p=dataPlayers.find(
+    x=>String(x.playerId)===String(r.playerId)
+   );
+
+   return p
+    ?{...p,number:r.number,name:r.name}
+    :{
+      playerId:r.playerId,
+      number:r.number,
+      name:r.name,
+      goals:0,
+      assists:0,
+      secondsP1:0,
+      secondsP2:0,
+      yellows:0,
+      doubleYellows:0,
+      reds:0,
+      goalsFor:0,
+      goalsAgainst:0
+     };
+  });
+ }else{
+  players=JSON.parse(JSON.stringify(dataPlayers.filter(hasData)));
  }
+
  return players.sort((a,b)=>Number(a.number)-Number(b.number));
   }
   function renderSavedMatchPlayerRows(m){
