@@ -802,7 +802,20 @@ function manualMatchCollectStats(){
    secondsP2,
    secondsExtra
   };
+  stat.penaltyAttempts=[];
 
+  if(window.manualMatchDetails.penaltiesOccurred){
+   const penaltyInput=document.querySelector('.manual-stat-penalties[data-index="'+i+'"]');
+   const penaltyText=penaltyInput.value.toUpperCase().replace(/[\s,]+/g,'');
+
+   if(!/^[MF]*$/.test(penaltyText)){
+    alert('En los penaltis de #'+p.number+' '+p.name+' utiliza solo M (marcado) o F (fallado).');
+    penaltyInput.focus();
+    return false;
+   }
+
+   stat.penaltyAttempts=Array.from(penaltyText).map(v=>v==='M'?'scored':'missed');
+  }
   for(const [key,selector] of fields){
    const input=document.querySelector(selector+'[data-index="'+i+'"]');
    const value=input.value;
