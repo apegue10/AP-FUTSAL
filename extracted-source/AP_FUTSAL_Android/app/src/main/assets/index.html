@@ -304,10 +304,16 @@ function toggleSavedMatchEdit(){
 }
   function updateSavedMatchPlayerField(input){
  if(!savedMatchEditDraft)return;
+function updateSavedMatchPlayerField(input){
+ if(!savedMatchEditDraft)return;
 
  const id=input.dataset.playerId;
  const field=input.dataset.field;
- const player=(savedMatchEditDraft.players||[]).find(
+
+ const players=getSavedMatchPlayers(savedMatchEditDraft);
+ savedMatchEditDraft.players=players;
+
+ const player=players.find(
   p=>String(p.playerId)===String(id)
  );
 
@@ -333,7 +339,7 @@ function toggleSavedMatchEdit(){
  }
 
  player[field]=value;
-  }
+}
 function closeSavedMatch(){
  document.getElementById('saved-match-detail').style.display='none';
  document.getElementById('match-history-body').closest('.table-wrap').style.display='';
