@@ -465,6 +465,42 @@ function editSavedMatch(id){
  viewSavedMatch(id);
 }
 function createManualMatch(){
+ const screen=document.getElementById('manual-match-screen');
+ const rosterList=document.getElementById('manual-match-roster-list');
+ const detail=document.getElementById('saved-match-detail');
+
+ if(!screen||!rosterList){
+  alert('No se ha encontrado la pantalla de creación manual.');
+  return;
+ }
+
+ if(detail)detail.style.display='none';
+
+ document.getElementById('manual-match-roster-step').style.display='block';
+ document.getElementById('manual-match-details-step').style.display='none';
+ document.getElementById('manual-match-stats-step').style.display='none';
+
+ rosterList.innerHTML=S.players.map(p=>`
+  <label class="player" style="display:flex;align-items:center;gap:12px;padding:10px">
+   <input type="checkbox" class="manual-match-called" data-player-id="${esc(String(p.id))}" ${p.called?'checked':''}>
+   <span class="number">${esc(String(p.number))}</span>
+   <span class="identity"><span class="name">${esc(p.name)}</span></span>
+  </label>
+ `).join('');
+
+ const competition=document.getElementById('manual-match-competition');
+ competition.innerHTML='<option value="">Selecciona una competición</option>'+
+  S.competitions.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+
+ screen.style.display='block';
+}
+
+function cancelManualMatch(){
+ const screen=document.getElementById('manual-match-screen');
+ if(screen)screen.style.display='none';
+}
+
+function createManualMatchLegacy(){
  const ask=(label,value='')=>prompt(label,value);
  const number=(label,value=0)=>{
   const v=ask(label,String(value));
