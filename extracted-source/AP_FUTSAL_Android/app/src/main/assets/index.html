@@ -487,7 +487,14 @@ function createManualMatch(){
    <span class="identity"><span class="name">${esc(p.name)}</span></span>
   </label>
  `).join('');
+ const today=new Date();
+ const localDate=new Date(today.getTime()-today.getTimezoneOffset()*60000)
+  .toISOString().slice(0,10);
 
+ document.getElementById('manual-match-date').value=localDate;
+ document.getElementById('manual-match-team').value=S.teamName||'Nosotros';
+ document.getElementById('manual-match-rival').value=S.rivalName||'';
+ document.getElementById('manual-match-venue').value=S.venue||'Local';
  const competition=document.getElementById('manual-match-competition');
  competition.innerHTML='<option value="">Selecciona una competición</option>'+
   S.competitions.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
