@@ -708,6 +708,7 @@ function manualMatchNextToStats(){
  window.manualMatchDetails={
   date,
   dateLabel:new Date(date+'T12:00:00').toLocaleDateString('es-ES'),
+  extraTimeOccurred:document.getElementById('manual-match-extra-time').value==='si',
   teamName:team,
   rivalName:rival,
   competition,
