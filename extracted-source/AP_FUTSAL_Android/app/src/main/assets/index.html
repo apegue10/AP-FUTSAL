@@ -319,6 +319,7 @@ let savedMatchEditing=false;
   }
   function renderSavedMatchPlayerRows(m){
  return getSavedMatchPlayers(m).map(p=>{
+   const extraSeconds=p.secondsExtra!==undefined?(p.secondsExtra||0):(p.secondsP3||0)+(p.secondsP4||0);
   const field=(key,value,time=false)=>{
    if(!savedMatchEditing)return time?formatTime(value||0):(value||0);
    return `<input
@@ -335,9 +336,10 @@ let savedMatchEditing=false;
    <td>#${esc(p.number)} ${esc(p.name)}</td>
    <td>${field('goals',p.goals)}</td>
    <td>${field('assists',p.assists)}</td>
-   <td>${savedMatchEditing?formatTime((p.secondsP1||0)+(p.secondsP2||0)):formatTime((p.secondsP1||0)+(p.secondsP2||0))}</td>
+   <td>${formatTime((p.secondsP1||0)+(p.secondsP2||0)+(m.extraTimeOccurred?extraSeconds:0))}</td>
    <td>${field('secondsP1',p.secondsP1,true)}</td>
    <td>${field('secondsP2',p.secondsP2,true)}</td>
+   ${m.extraTimeOccurred?'<td>'+field('secondsExtra',extraSeconds,true)+'</td>':''}
    <td>${field('yellows',p.yellows)}</td>
    <td>${field('doubleYellows',p.doubleYellows)}</td>
    <td>${field('reds',p.reds)}</td>
