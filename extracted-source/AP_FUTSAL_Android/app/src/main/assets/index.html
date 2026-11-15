@@ -499,7 +499,36 @@ function cancelManualMatch(){
  const screen=document.getElementById('manual-match-screen');
  if(screen)screen.style.display='none';
 }
+function manualMatchNextToDetails(){
+ const selected=document.querySelectorAll('.manual-match-called:checked');
 
+ if(!selected.length){
+  alert('Selecciona al menos un jugador convocado.');
+  return;
+ }
+
+ window.manualMatchRoster=[];
+
+ selected.forEach(input=>{
+  const player=S.players.find(p=>String(p.id)===String(input.dataset.playerId));
+
+  if(player){
+   window.manualMatchRoster.push({
+    playerId:player.id,
+    number:player.number,
+    name:player.name
+   });
+  }
+ });
+
+ if(!window.manualMatchRoster.length){
+  alert('No se han podido cargar los jugadores seleccionados.');
+  return;
+ }
+
+ document.getElementById('manual-match-roster-step').style.display='none';
+ document.getElementById('manual-match-details-step').style.display='block';
+}
 function createManualMatchLegacy(){
  const ask=(label,value='')=>prompt(label,value);
  const number=(label,value=0)=>{
