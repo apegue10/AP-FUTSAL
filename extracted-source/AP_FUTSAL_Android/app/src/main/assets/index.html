@@ -203,6 +203,9 @@ filteredAll.forEach(m=>{
 '<tr><td colspan="11">Todavía no hay estadísticas registradas.</td></tr>';
  const history=[...S.matchHistory];if(matchHasActivity())history.push(snapshotMatch('Partido actual',false));document.getElementById('match-history-body').innerHTML=history.slice().reverse().map(m=>`<tr><td>${esc(m.dateLabel||m.date||'—')}</td><td>${esc(m.venue||'—')}</td><td>${esc(m.teamName||'Equipo')}</td><td>${esc(m.rivalName||'—')}${m.manual?' (MANUAL)':''}</td><td>${esc(m.competition||'—')}</td><td>${m.scoreNos??0} - ${m.scoreRiv??0}${m.status==='actual'?' (actual)':''}</td><td>${(m.events||[]).length}</td><td>${m.status==='actual'?'—':`<button class="primary small" onclick="viewSavedMatch('${m.id}')">Ver estadísticas</button> <button class="primary small" onclick="editSavedMatch('${m.id}')">Editar</button> <button class="danger small" onclick="deleteSavedMatch('${m.id}')">Eliminar</button>`}</td></tr>`).join('')||'<tr><td colspan="8">Los partidos guardados aparecerán aquí.</td></tr>';
 }
+let savedMatchEditId=null;
+let savedMatchEditDraft=null;
+let savedMatchEditing=false;
   function viewSavedMatch(id){
  const m=S.matchHistory.find(x=>String(x.id)===String(id));
  if(!m)return;
