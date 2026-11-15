@@ -409,7 +409,7 @@ function updateSavedMatchPlayerField(input){
 
  let value;
 
- if(field==='secondsP1'||field==='secondsP2'){
+ if(field==='secondsP1'||field==='secondsP2'||field==='secondsExtra'){
   const match=input.value.trim().match(/^(\d+):([0-5]\d)$/);
   if(!match){
    alert('Introduce el tiempo en formato MM:SS. Ejemplo: 12:35');
