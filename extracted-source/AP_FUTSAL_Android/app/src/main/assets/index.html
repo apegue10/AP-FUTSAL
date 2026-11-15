@@ -44,8 +44,11 @@
     <h2>Estadísticas del partido</h2>
     <div id="saved-match-info"></div>
     <div class="tools">
-      <button class="primary" onclick="exportPDF('saved-match-report')">Exportar partido a PDF</button>
-      <button onclick="closeSavedMatch()">Volver al historial</button>
+  <button class="primary" id="saved-match-edit-button" onclick="toggleSavedMatchEdit()">Editar estadísticas</button>
+  <button class="primary" id="saved-match-save-button" onclick="saveSavedMatchEdit()" style="display:none">Guardar cambios</button>
+  <button id="saved-match-cancel-button" onclick="cancelSavedMatchEdit()" style="display:none">Cancelar</button>
+  <button onclick="exportPDF('saved-match-report')">Exportar partido a PDF</button>
+  <button onclick="closeSavedMatch()">Volver al historial</button>
     </div>
     <h3>Estadísticas individuales</h3>
     <div class="table-wrap">
@@ -244,88 +247,7 @@ function closeSavedMatch(){
  document.getElementById('match-history-body').closest('.table-wrap').style.display='';
 }
 function editSavedMatch(id){
- const m=S.matchHistory.find(x=>String(x.id)===String(id));
- if(!m)return;
- const d=JSON.parse(JSON.stringify(m));
- const ask=(label,value)=>{
-  const v=prompt(label,value??'');
-  return v===null?null:v.trim();
- };
- const num=(label,value)=>{
-  const v=ask(label,value);
-  if(v===null)return null;
-  const n=Number(v);
-  return Number.isFinite(n)&&n>=0?n:null;
- };
-  const time=(label,value)=>{
-  const raw=ask(label,formatTime(value||0));
-  if(raw===null)return null;
-  const match=raw.match(/^(\d+):([0-5]\d)$/);
-  if(!match){
-   alert('Introduce el tiempo en formato MM:SS. Ejemplo: 12:35');
-   return null;
-  }
-  return Number(match[1])*60+Number(match[2]);
-};
- let v;
- v=ask('Fecha del partido',d.dateLabel||'');if(v===null)return;d.dateLabel=v;
- v=ask('Nombre de nuestro equipo',d.teamName||'');if(v===null)return;d.teamName=v;
- v=ask('Nombre del rival',d.rivalName||'');if(v===null)return;d.rivalName=v;
- v=ask('Competición',d.competition||'');if(v===null)return;d.competition=v;
- v=ask('Local o visitante',d.venue||'Local');if(v===null)return;d.venue=v;
- const fields=[
-  ['Goles de nuestro equipo','scoreNos'],
-  ['Goles del rival','scoreRiv'],
-  ['Faltas de nuestro equipo','foulsNos'],
-  ['Faltas del rival','foulsRiv']
- ];
- for(const [label,key,isMinutes] of fields){
-  v=num(label,isMinutes?Math.round((d[key]||0)/60):(d[key]||0));
-  if(v===null)return;
-  d[key]=isMinutes?Math.round(v*60):v;
- }
- for(const p of d.players||[]){
-  if(!confirm('¿Editar las estadísticas de #'+p.number+' '+p.name+'?'))continue;
-  const stats=[
-   ['Goles','goals'],['Asistencias','assists'],
-   ['Minutos 1.ª parte','secondsP1',true],
-  ['Minutos 2.ª parte','secondsP2',true],
-   ['Goles a favor en pista','goalsFor'],
-   ['Goles en contra en pista','goalsAgainst'],
-   ['Amarillas','yellows'],['Dobles amarillas','doubleYellows'],
-   ['Rojas','reds']
-  ];
-  for(const [label,key,isMinutes] of stats){
-   if(isMinutes){
-    v=time(p.name+' — '+label,p[key]||0);
-   }else{
-    v=num(p.name+' — '+label,p[key]||0);
-   }
-   if(v===null)return;
-   p[key]=v;
-  }
- }
- if(!confirm('¿Guardar los cambios de este partido?'))return;
- const index=S.matchHistory.findIndex(x=>String(x.id)===String(id));
- if(index<0)return;
-S.matchHistory[index]=d;
-save();
-
-// Marcar los cambios como pendientes de sincronización.
-try{
- const key='AP_FUTSAL_CLOUD_PENDING';
- const pending=JSON.parse(localStorage.getItem(key)||'[]');
- if(!pending.includes(d.id))pending.push(d.id);
- localStorage.setItem(key,JSON.stringify(pending));
- if(navigator.onLine && typeof cloudSyncPending==='function'){
-  setTimeout(()=>cloudSyncPending(),1500);
- }
-}catch(e){
- console.warn('No se pudo marcar la sincronización:',e);
-}
-
-renderStats();
-alert('Partido actualizado. Queda pendiente de sincronización si no hay conexión.');
+ viewSavedMatch(id);
 }
 function createManualMatch(){
  const ask=(label,value='')=>prompt(label,value);
