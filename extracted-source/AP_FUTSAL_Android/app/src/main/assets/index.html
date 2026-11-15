@@ -411,8 +411,113 @@ function saveSavedMatchEdit(){
   return;
  }
 
- S.matchHistory[index].players=
+const editedMatch=S.matchHistory[index];
+const editedPlayers=
   JSON.parse(JSON.stringify(savedMatchEditDraft.players||[]));
+
+if(editedMatch.manualFormVersion===2){
+
+ const totalGoals=editedPlayers.reduce(
+  (sum,p)=>sum+(p.goals||0),0
+ );
+
+ const totalAssists=editedPlayers.reduce(
+  (sum,p)=>sum+(p.assists||0),0
+ );
+
+ if(totalGoals>editedMatch.scoreNos||totalAssists>editedMatch.scoreNos){
+  alert('Los goles y las asistencias individuales no pueden superar los goles del marcador.');
+  return;
+ }
+
+ for(const p of editedPlayers){
+  if((p.doubleYellows||0)*2>(p.yellows||0)){
+   alert('Las dobles amarillas de #'+p.number+' '+p.name+' no pueden superar la mitad de sus tarjetas amarillas.');
+   return;
+  }
+ }
+
+ const preservedEvents=(editedMatch.events||[]).filter(e=>
+  !['Gol a favor','Gol en contra'].includes(e.type)&&
+  !(e.type==='Acción de jugador'&&
+    ['Amarilla','Doble amarilla','Roja directa'].includes(e.action))
+ );
+
+ const rebuiltEvents=[];
+ let eventNumber=0;
+ const eventId=()=> 'manual-event-'+Date.now()+'-'+(++eventNumber);
+
+ editedPlayers.forEach(p=>{
+  const simpleYellows=Math.max(
+   0,(p.yellows||0)-2*(p.doubleYellows||0)
+  );
+
+  const addCards=(action,count)=>{
+   for(let i=0;i<count;i++){
+    rebuiltEvents.push({
+     id:eventId(),
+     type:'Acción de jugador',
+     action,
+     playerId:p.playerId,
+     period:null,
+     time:'Sin registrar',
+     quintet:[]
+    });
+   }
+  };
+
+  addCards('Amarilla',simpleYellows);
+  addCards('Doble amarilla',p.doubleYellows||0);
+  addCards('Roja directa',p.reds||0);
+ });
+
+ const scorers=[];
+ const assists=[];
+
+ editedPlayers.forEach(p=>{
+  for(let i=0;i<(p.goals||0);i++)scorers.push(p.playerId);
+  for(let i=0;i<(p.assists||0);i++)assists.push(p.playerId);
+ });
+
+ let currentNos=0;
+ let currentRiv=0;
+
+ for(let i=0;i<editedMatch.scoreNos;i++){
+  currentNos++;
+
+  rebuiltEvents.push({
+   id:eventId(),
+   type:'Gol a favor',
+   period:null,
+   time:'Sin registrar',
+   scorer:scorers[i]??null,
+   assist:assists[i]??null,
+   quintet:[],
+   scoreNos:currentNos,
+   scoreRiv:currentRiv
+  });
+ }
+
+ for(let i=0;i<editedMatch.scoreRiv;i++){
+  currentRiv++;
+
+  rebuiltEvents.push({
+   id:eventId(),
+   type:'Gol en contra',
+   period:null,
+   time:'Sin registrar',
+   scorer:null,
+   assist:null,
+   quintet:[],
+   scoreNos:currentNos,
+   scoreRiv:currentRiv
+  });
+ }
+
+ editedMatch.events=[...preservedEvents,...rebuiltEvents];
+}
+
+editedMatch.players=editedPlayers;
 
  save();
 
