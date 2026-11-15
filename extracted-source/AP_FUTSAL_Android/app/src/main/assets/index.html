@@ -417,7 +417,7 @@ let savedMatchEditing=false;
    <td>${field('secondsP1',p.secondsP1,true)}</td>
    <td>${field('secondsP2',p.secondsP2,true)}</td>
    ${m.extraTimeOccurred?'<td>'+field('secondsExtra',extraSeconds,true)+'</td>':''}
-   ${m.penaltiesOccurred?'<td>'+((p.penaltyAttempts||penaltyAttempts).map(a=>'<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:'+(a==='scored'?'#16a34a':'#dc2626')+';margin:2px"></span>').join('')||'—')+'</td>':''}
+   ${m.penaltiesOccurred?'<td>'+((p.penaltyAttempts&&p.penaltyAttempts.length?p.penaltyAttempts:penaltyAttempts).map(a=>'<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:'+(a==='scored'?'#16a34a':'#dc2626')+';margin:2px"></span>').join('')||'—')+'</td>':''}
    <td>${field('yellows',p.yellows)}</td>
    <td>${field('doubleYellows',p.doubleYellows)}</td>
    <td>${field('reds',p.reds)}</td>
