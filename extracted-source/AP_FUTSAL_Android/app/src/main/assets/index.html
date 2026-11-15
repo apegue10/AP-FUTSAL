@@ -271,15 +271,7 @@ let savedMatchEditing=false;
   `<p><strong>${esc(m.dateLabel||m.date||'')}</strong> · ${esc(m.venue||'')}</p>
   <p><strong>${esc(m.teamName||'Equipo')} ${m.scoreNos??0} - ${m.scoreRiv??0} ${esc(m.rivalName||'Rival')}</strong></p>
   <p>Competición: ${esc(m.competition||'—')} · Faltas: ${m.foulsNos||0} - ${m.foulsRiv||0}</p>`;
- document.getElementById('saved-match-players').innerHTML=
-  (m.players||[]).slice().sort((a,b)=>Number(a.number)-Number(b.number)).map(p=>
-   `<tr><td>#${esc(p.number)} ${esc(p.name)}</td>
-   <td>${p.goals||0}</td><td>${p.assists||0}</td>
-   <td>${formatTime((p.secondsP1||0)+(p.secondsP2||0))}</td>
-   <td>${formatTime(p.secondsP1||0)}</td><td>${formatTime(p.secondsP2||0)}</td>
-   <td>${p.yellows||0}</td><td>${p.doubleYellows||0}</td><td>${p.reds||0}</td>
-   <td>${p.goalsFor||0}</td><td>${p.goalsAgainst||0}</td></tr>`
-  ).join('')||'<tr><td colspan="11">No hay estadísticas individuales.</td></tr>';
+document.getElementById('saved-match-players').innerHTML=renderSavedMatchPlayerRows(m);
  document.getElementById('saved-match-events').innerHTML=
   (m.events||[]).map(e=>{
    let detail='';
