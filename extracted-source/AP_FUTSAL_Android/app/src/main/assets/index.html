@@ -617,6 +617,71 @@ function manualMatchNextToStats(){
  document.getElementById('manual-match-details-step').style.display='none';
  document.getElementById('manual-match-stats-step').style.display='block';
 }
+
+function manualMatchCollectStats(){
+ const players=[];
+
+ const readTime=(selector)=>{
+  const value=document.querySelector(selector).value.trim();
+  const match=value.match(/^(\d+):([0-5]\d)$/);
+
+  if(!match)return null;
+
+  return Number(match[1])*60+Number(match[2]);
+ };
+
+ const fields=[
+  ['goals','.manual-stat-goals'],
+  ['assists','.manual-stat-assists'],
+  ['yellows','.manual-stat-yellows'],
+  ['doubleYellows','.manual-stat-double-yellows'],
+  ['reds','.manual-stat-reds'],
+  ['goalsFor','.manual-stat-goals-for'],
+  ['goalsAgainst','.manual-stat-goals-against']
+ ];
+
+ for(let i=0;i<window.manualMatchRoster.length;i++){
+  const p=window.manualMatchRoster[i];
+
+  const secondsP1=readTime('.manual-stat-p1[data-index="'+i+'"]');
+  const secondsP2=readTime('.manual-stat-p2[data-index="'+i+'"]');
+
+  if(secondsP1===null||secondsP2===null){
+   alert('Revisa los minutos de #'+p.number+' '+p.name+'. Usa el formato MM:SS, por ejemplo 12:35.');
+   return false;
+  }
+
+  const stat={
+   playerId:p.playerId,
+   number:p.number,
+   name:p.name,
+   secondsP1,
+   secondsP2
+  };
+
+  for(const [key,selector] of fields){
+   const input=document.querySelector(selector+'[data-index="'+i+'"]');
+   const value=input.value;
+
+   if(value===''||!Number.isInteger(Number(value))||Number(value)<0){
+    alert('Revisa las estadísticas de #'+p.number+' '+p.name+'. Deben ser números enteros iguales o superiores a cero.');
+    input.focus();
+    return false;
+   }
+
+   stat[key]=Number(value);
+  }
+
+  const hasStats=Object.keys(stat).some(key=>
+   !['playerId','number','name'].includes(key)&&stat[key]>0
+  );
+
+  if(hasStats)players.push(stat);
+ }
+
+ window.manualMatchPlayers=players;
+ return true;
+}
   
 function createManualMatchLegacy(){
  const ask=(label,value='')=>prompt(label,value);
