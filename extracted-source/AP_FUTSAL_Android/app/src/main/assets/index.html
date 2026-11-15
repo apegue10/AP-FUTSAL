@@ -257,6 +257,16 @@ function editSavedMatch(id){
   const n=Number(v);
   return Number.isFinite(n)&&n>=0?n:null;
  };
+  const time=(label,value)=>{
+  const raw=ask(label,formatTime(value||0));
+  if(raw===null)return null;
+  const match=raw.match(/^(\d+):([0-5]\d)$/);
+  if(!match){
+   alert('Introduce el tiempo en formato MM:SS. Ejemplo: 12:35');
+   return null;
+  }
+  return Number(match[1])*60+Number(match[2]);
+};
  let v;
  v=ask('Fecha del partido',d.dateLabel||'');if(v===null)return;d.dateLabel=v;
  v=ask('Nombre de nuestro equipo',d.teamName||'');if(v===null)return;d.teamName=v;
@@ -285,8 +295,12 @@ function editSavedMatch(id){
    ['Amarillas','yellows'],['Dobles amarillas','doubleYellows'],
    ['Rojas','reds']
   ];
-  for(const [label,key] of stats){
-   v=num(p.name+' — '+label,p[key]||0);
+  for(const [label,key,isMinutes] of stats){
+   if(isMinutes){
+    v=time(p.name+' — '+label,p[key]||0);
+   }else{
+    v=num(p.name+' — '+label,p[key]||0);
+   }
    if(v===null)return;
    p[key]=v;
   }
@@ -321,7 +335,18 @@ function createManualMatch(){
   if(v===null)return null;
   const n=Number(v);
   return Number.isFinite(n)&&n>=0?n:null;
- };
+};
+
+const time=(label)=>{
+  const v=ask(label,'00:00');
+  if(v===null)return null;
+  const m=v.trim().match(/^(\d+):([0-5]\d)$/);
+  if(!m){
+   alert('Introduce el tiempo en formato MM:SS. Ejemplo: 12:35');
+   return null;
+  }
+  return Number(m[1])*60+Number(m[2]);
+};
  const date=ask('Fecha del partido (DD/MM/AAAA)',new Date().toLocaleDateString('es-ES'));
  if(date===null)return;
  const team=ask('Nombre de nuestro equipo',S.teamName||'Nosotros');if(team===null)return;
@@ -374,11 +399,13 @@ for(const p of S.players){
    ['Goles a favor en pista','goalsFor'],
    ['Goles en contra en pista','goalsAgainst'],
   ];
-  for(const [label,key,isMinutes] of fields){
-   const n=number(p.name+' — '+label);
+for(const [label,key,isMinutes] of fields){
+   const n=isMinutes
+    ?time(p.name+' — '+label)
+    :number(p.name+' — '+label);
    if(n===null)return;
-   p2[key]=isMinutes?Math.round(n*60):n;
-  }
+   p2[key]=n;
+}
   players.push(p2);
  }
   const events=[];
