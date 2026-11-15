@@ -230,6 +230,35 @@ let savedMatchEditing=false;
  }
  return players.sort((a,b)=>Number(a.number)-Number(b.number));
   }
+  function renderSavedMatchPlayerRows(m){
+ return getSavedMatchPlayers(m).map(p=>{
+  const field=(key,value,time=false)=>{
+   if(!savedMatchEditing)return time?formatTime(value||0):(value||0);
+   return `<input
+    type="${time?'text':'number'}"
+    ${time?'':'min="0" step="1"'}
+    value="${time?formatTime(value||0):(value||0)}"
+    data-player-id="${esc(p.playerId)}"
+    data-field="${key}"
+    style="width:75px;min-width:65px;padding:5px"
+    onchange="updateSavedMatchPlayerField(this)">`;
+  };
+
+  return `<tr>
+   <td>#${esc(p.number)} ${esc(p.name)}</td>
+   <td>${field('goals',p.goals)}</td>
+   <td>${field('assists',p.assists)}</td>
+   <td>${savedMatchEditing?formatTime((p.secondsP1||0)+(p.secondsP2||0)):formatTime((p.secondsP1||0)+(p.secondsP2||0))}</td>
+   <td>${field('secondsP1',p.secondsP1,true)}</td>
+   <td>${field('secondsP2',p.secondsP2,true)}</td>
+   <td>${field('yellows',p.yellows)}</td>
+   <td>${field('doubleYellows',p.doubleYellows)}</td>
+   <td>${field('reds',p.reds)}</td>
+   <td>${field('goalsFor',p.goalsFor)}</td>
+   <td>${field('goalsAgainst',p.goalsAgainst)}</td>
+  </tr>`;
+ }).join('')||'<tr><td colspan="11">No hay estadísticas individuales.</td></tr>';
+  }
   function viewSavedMatch(id){
  const m=S.matchHistory.find(x=>String(x.id)===String(id));
  if(!m)return;
