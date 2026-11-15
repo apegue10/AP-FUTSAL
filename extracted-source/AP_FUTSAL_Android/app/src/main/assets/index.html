@@ -529,6 +529,10 @@ function manualMatchNextToDetails(){
  document.getElementById('manual-match-roster-step').style.display='none';
  document.getElementById('manual-match-details-step').style.display='block';
 }
+  function manualMatchBackToRoster(){
+ document.getElementById('manual-match-details-step').style.display='none';
+ document.getElementById('manual-match-roster-step').style.display='block';
+  }
 function createManualMatchLegacy(){
  const ask=(label,value='')=>prompt(label,value);
  const number=(label,value=0)=>{
