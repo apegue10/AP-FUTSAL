@@ -51,6 +51,67 @@
   <button onclick="closeSavedMatch()">Volver al historial</button>
     </div>
     <h3>Estadísticas individuales</h3>
+    <div id="manual-match-screen" style="display:none;margin:20px 0;padding:15px;border:1px solid var(--border);border-radius:10px">
+  <h2>Crear partido manual</h2>
+
+  <div id="manual-match-roster-step">
+    <h3>1. Convocatoria</h3>
+    <p>Selecciona los jugadores convocados para este partido.</p>
+    <div id="manual-match-roster-list"></div>
+    <div class="tools">
+      <button class="primary" onclick="manualMatchNextToDetails()">Continuar</button>
+      <button onclick="cancelManualMatch()">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="manual-match-details-step" style="display:none">
+    <h3>2. Datos del partido</h3>
+
+    <p>Fecha</p>
+    <input id="manual-match-date" type="date">
+
+    <p>Equipo</p>
+    <input id="manual-match-team" type="text">
+
+    <p>Rival</p>
+    <input id="manual-match-rival" type="text">
+
+    <p>Competición</p>
+    <select id="manual-match-competition"></select>
+
+    <p>Local o visitante</p>
+    <select id="manual-match-venue">
+      <option value="Local">Local</option>
+      <option value="Visitante">Visitante</option>
+    </select>
+
+    <p>Goles de nuestro equipo</p>
+    <input id="manual-match-score-nos" type="number" min="0" value="0">
+
+    <p>Goles del rival</p>
+    <input id="manual-match-score-riv" type="number" min="0" value="0">
+
+    <p>Faltas de nuestro equipo</p>
+    <input id="manual-match-fouls-nos" type="number" min="0" value="0">
+
+    <p>Faltas del rival</p>
+    <input id="manual-match-fouls-riv" type="number" min="0" value="0">
+
+    <div class="tools">
+      <button onclick="manualMatchBackToRoster()">Atrás</button>
+      <button class="primary" onclick="manualMatchNextToStats()">Continuar</button>
+    </div>
+  </div>
+
+  <div id="manual-match-stats-step" style="display:none">
+    <h3>3. Estadísticas individuales</h3>
+    <div id="manual-match-stats-list"></div>
+    <div class="tools">
+      <button onclick="manualMatchBackToDetails()">Atrás</button>
+      <button class="primary" onclick="saveManualMatchForm()">Guardar partido</button>
+    </div>
+  </div>
+    </div>
     <div class="table-wrap">
       <table class="stats-table">
         <thead>
