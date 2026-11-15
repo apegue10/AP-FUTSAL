@@ -293,6 +293,15 @@ return `<div class="event"><strong>${esc(e.type||'Evento')}</strong> · ${esc(wh
  document.getElementById('match-history-body').closest('.table-wrap').style.display='none';
  document.getElementById('saved-match-detail').style.display='block';
 }
+function toggleSavedMatchEdit(){
+ if(!savedMatchEditDraft)return;
+ savedMatchEditing=true;
+ document.getElementById('saved-match-players').innerHTML=
+  renderSavedMatchPlayerRows(savedMatchEditDraft);
+ document.getElementById('saved-match-edit-button').style.display='none';
+ document.getElementById('saved-match-save-button').style.display='';
+ document.getElementById('saved-match-cancel-button').style.display='';
+}
 function closeSavedMatch(){
  document.getElementById('saved-match-detail').style.display='none';
  document.getElementById('match-history-body').closest('.table-wrap').style.display='';
