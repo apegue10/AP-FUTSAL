@@ -540,6 +540,84 @@ function manualMatchNextToDetails(){
  document.getElementById('manual-match-details-step').style.display='none';
  document.getElementById('manual-match-roster-step').style.display='block';
   }
+
+function manualMatchNextToStats(){
+ const date=document.getElementById('manual-match-date').value;
+ const team=document.getElementById('manual-match-team').value.trim();
+ const rival=document.getElementById('manual-match-rival').value.trim();
+ const competition=document.getElementById('manual-match-competition').value;
+ const venue=document.getElementById('manual-match-venue').value;
+
+ const scoreNos=document.getElementById('manual-match-score-nos').value;
+ const scoreRiv=document.getElementById('manual-match-score-riv').value;
+ const foulsNos=document.getElementById('manual-match-fouls-nos').value;
+ const foulsRiv=document.getElementById('manual-match-fouls-riv').value;
+
+ if(!date||!team||!rival){
+  alert('Indica la fecha, el equipo y el rival.');
+  return;
+ }
+
+ if(!competition||!S.competitions.includes(competition)){
+  alert('Selecciona una competición existente.');
+  return;
+ }
+
+ if(venue!=='Local'&&venue!=='Visitante'){
+  alert('Selecciona si el partido es local o visitante.');
+  return;
+ }
+
+ const numbers=[scoreNos,scoreRiv,foulsNos,foulsRiv];
+
+ if(numbers.some(v=>v===''||!Number.isInteger(Number(v))||Number(v)<0)){
+  alert('Los goles y las faltas deben ser números enteros iguales o superiores a cero.');
+  return;
+ }
+
+ window.manualMatchDetails={
+  date,
+  dateLabel:new Date(date+'T12:00:00').toLocaleDateString('es-ES'),
+  teamName:team,
+  rivalName:rival,
+  competition,
+  venue,
+  scoreNos:Number(scoreNos),
+  scoreRiv:Number(scoreRiv),
+  foulsNos:Number(foulsNos),
+  foulsRiv:Number(foulsRiv)
+ };
+
+ const statsList=document.getElementById('manual-match-stats-list');
+
+ statsList.innerHTML=window.manualMatchRoster.map((p,i)=>`
+  <div class="player" style="padding:12px;margin:10px 0;border:1px solid var(--border);border-radius:10px">
+   <h3>#${esc(String(p.number))} ${esc(p.name)}</h3>
+   <p>Minutos primera parte (MM:SS)</p>
+   <input type="text" class="manual-stat-p1" data-index="${i}" value="00:00" placeholder="12:35">
+   <p>Minutos segunda parte (MM:SS)</p>
+   <input type="text" class="manual-stat-p2" data-index="${i}" value="00:00" placeholder="12:35">
+   <p>Goles</p>
+   <input type="number" class="manual-stat-goals" data-index="${i}" min="0" value="0">
+   <p>Asistencias</p>
+   <input type="number" class="manual-stat-assists" data-index="${i}" min="0" value="0">
+   <p>Tarjetas amarillas</p>
+   <input type="number" class="manual-stat-yellows" data-index="${i}" min="0" value="0">
+   <p>Dobles amarillas</p>
+   <input type="number" class="manual-stat-double-yellows" data-index="${i}" min="0" value="0">
+   <p>Tarjetas rojas</p>
+   <input type="number" class="manual-stat-reds" data-index="${i}" min="0" value="0">
+   <p>Goles a favor mientras estaba en pista</p>
+   <input type="number" class="manual-stat-goals-for" data-index="${i}" min="0" value="0">
+   <p>Goles en contra mientras estaba en pista</p>
+   <input type="number" class="manual-stat-goals-against" data-index="${i}" min="0" value="0">
+  </div>
+ `).join('');
+
+ document.getElementById('manual-match-details-step').style.display='none';
+ document.getElementById('manual-match-stats-step').style.display='block';
+}
+  
 function createManualMatchLegacy(){
  const ask=(label,value='')=>prompt(label,value);
  const number=(label,value=0)=>{
