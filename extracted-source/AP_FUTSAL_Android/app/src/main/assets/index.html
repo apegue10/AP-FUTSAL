@@ -206,6 +206,30 @@ filteredAll.forEach(m=>{
 let savedMatchEditId=null;
 let savedMatchEditDraft=null;
 let savedMatchEditing=false;
+  function getSavedMatchPlayers(m){
+ const players=JSON.parse(JSON.stringify(m.players||[]));
+ const roster=m.roster||[];
+
+ for(const r of roster){
+  if(!players.some(p=>String(p.playerId)===String(r.playerId))){
+   players.push({
+    playerId:r.playerId,
+    number:r.number,
+    name:r.name,
+    goals:0,
+    assists:0,
+    secondsP1:0,
+    secondsP2:0,
+    yellows:0,
+    doubleYellows:0,
+    reds:0,
+    goalsFor:0,
+    goalsAgainst:0
+   });
+  }
+ }
+ return players.sort((a,b)=>Number(a.number)-Number(b.number));
+  }
   function viewSavedMatch(id){
  const m=S.matchHistory.find(x=>String(x.id)===String(id));
  if(!m)return;
