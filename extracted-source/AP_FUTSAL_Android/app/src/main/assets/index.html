@@ -457,6 +457,7 @@ document.getElementById('saved-match-extra-header').style.display=m.extraTimeOcc
     detail=' · '+esc(playerName(e.playerId))+': '+esc(e.action||'');
    }else if(e.type==='Penalti'){
     detail=' · '+esc(playerName(e.playerId))+': '+(e.result==='scored'?'Penalti marcado':'Penalti fallado');
+   }
    const when=(e.period?e.period+'ª parte · ':'')+(e.time&&e.time!=='Sin registrar'?e.time:'Tiempo sin registrar');
 return `<div class="event"><strong>${esc(e.type||'Evento')}</strong> · ${esc(when)}${detail}</div>`;
   }).join('')||'<p>No hay eventos registrados.</p>';
