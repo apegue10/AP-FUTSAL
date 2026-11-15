@@ -1206,7 +1206,7 @@ roster:S.players.filter(p=>p.called).map(p=>({
  number:p.number,
  name:p.name
 })),
-events:JSON.parse(JSON.stringify(S.events||[])),players:S.players.map(p=>({playerId:p.id,number:p.number,name:p.name,secondsP1:p.secondsP1||0,secondsP2:p.secondsP2||0,goals:p.goals||0,assists:p.assists||0,goalsFor:p.goalsFor||0,goalsAgainst:p.goalsAgainst||0,yellows:p.yellows||0,doubleYellows:p.doubleYellows||0,reds:p.reds||0}))}}
+events:JSON.parse(JSON.stringify(S.events||[])),players:S.players.map(p=>({playerId:p.id,number:p.number,name:p.name,secondsP1:p.secondsP1||0,secondsP2:p.secondsP2||0,secondsP3:p.secondsP3||0,secondsP4:p.secondsP4||0,goals:p.goals||0,assists:p.assists||0,goalsFor:p.goalsFor||0,goalsAgainst:p.goalsAgainst||0,yellows:p.yellows||0,doubleYellows:p.doubleYellows||0,reds:p.reds||0}))}}
 function archiveCurrentMatch(){if(!matchHasActivity())return;const m=snapshotMatch('Partido',true);m.id='m-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);S.matchHistory.push(m)}
 
 function switchView(name){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===name));if(name==='estadisticas'||name==='generales'||name==='historial')renderStats();if(name==='plantilla')renderRoster()}
