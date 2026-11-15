@@ -753,6 +753,7 @@ function manualMatchNextToStats(){
    <input type="number" class="manual-stat-goals-for" data-index="${i}" min="0" value="0">
    <p>Goles en contra mientras estaba en pista</p>
    <input type="number" class="manual-stat-goals-against" data-index="${i}" min="0" value="0">
+      ${window.manualMatchDetails.penaltiesOccurred?'<p>Penaltis (M = marcado, F = fallado). Ejemplo: MFM</p><input type="text" class="manual-stat-penalties" data-index="'+i+'" placeholder="MFM">':''}
   </div>
  `).join('');
 
