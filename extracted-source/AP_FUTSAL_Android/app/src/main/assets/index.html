@@ -30,12 +30,12 @@
 </div></header>
 <nav class="nav"><button class="active" data-view="partido" onclick="switchView('partido')">⚽ Partido</button><button data-view="plantilla" onclick="switchView('plantilla')">👥 Plantilla</button><button data-view="estadisticas" onclick="switchView('estadisticas')">📊 Partido actual</button><button data-view="generales" onclick="switchView('generales')">📈 Estadísticas generales</button><button data-view="historial" onclick="switchView('historial')">🗂️ Historial</button><button data-view="ajustes" onclick="switchView('ajustes')">⚙️ Partido y datos</button></nav>
 <main>
-<section id="view-partido" class="view active"><div class="layout"><div class="panel"><h2>Quinteto en pista <span class="tag">5 posiciones</span></h2><div class="court"><div class="court-markings" aria-hidden="true"><span class="penalty-area top"></span><span class="penalty-area bottom"></span><span class="goal-mark top"></span><span class="goal-mark bottom"></span></div><div class="court-row"><button class="slot" id="slot-0" onclick="chooseSlot(0)"><span class="pos">PORTERO</span><span class="pname">+ Seleccionar</span></button></div><div class="court-row"><button class="slot" id="slot-1" onclick="chooseSlot(1)"><span class="pos">CIERRE</span><span class="pname">+ Seleccionar</span></button></div><div class="court-row"><button class="slot" id="slot-2" onclick="chooseSlot(2)"><span class="pos">ALA IZQ.</span><span class="pname">+ Seleccionar</span></button><button class="slot" id="slot-3" onclick="chooseSlot(3)"><span class="pos">ALA DER.</span><span class="pname">+ Seleccionar</span></button></div><div class="court-row"><button class="slot" id="slot-4" onclick="chooseSlot(4)"><span class="pos">PÍVOT</span><span class="pname">+ Seleccionar</span></button></div></div><div class="tools"><button onclick="clearCourt()">Mandar quinteto al banquillo</button></div><div class="muted" id="selected-slot-label" style="font-size:12px">Toca un jugador en pista y después toca directamente al jugador del banquillo que entra.</div><div id="player-actions" class="panel" style="display:none;margin-top:10px;padding:10px;background:#0d1726"><h3 id="action-player-title">Acciones de jugador</h3><div class="tools"><button class="primary" onclick="playerAction('Gol')">⚽ Gol</button><button class="blue" onclick="playerAction('Asistencia')">🅰️ Asistencia</button><button class="warning" onclick="playerAction('Amarilla')">🟨 Amarilla</button><button class="warning" onclick="playerAction('Doble amarilla')">🟨🟨 Doble amarilla</button><button class="danger" onclick="playerAction('Roja directa')">🟥 Roja directa</button><button onclick="clearSelectedPlayer()">Cerrar</button></div></div></div>
+<section id="view-partido" class="view active"><div class="layout"><div class="panel"><h2>Quinteto en pista <span class="tag">5 posiciones</span></h2><div class="court"><div class="court-markings" aria-hidden="true"><span class="penalty-area top"></span><span class="penalty-area bottom"></span><span class="goal-mark top"></span><span class="goal-mark bottom"></span></div><div class="court-row"><button class="slot" id="slot-0" onclick="chooseSlot(0)"><span class="pos">PORTERO</span><span class="pname">+ Seleccionar</span></button></div><div class="court-row"><button class="slot" id="slot-1" onclick="chooseSlot(1)"><span class="pos">CIERRE</span><span class="pname">+ Seleccionar</span></button></div><div class="court-row"><butt9on class="slot" id="slot-2" onclick="chooseSlot(2)"><span class="pos">ALA IZQ.</span><span class="pname">+ Seleccionar</span></button><button class="slot" id="slot-3" onclick="chooseSlot(3)"><span class="pos">ALA DER.</span><span class="pname">+ Seleccionar</span></button></div><div class="court-row"><button class="slot" id="slot-4" onclick="chooseSlot(4)"><span class="pos">PÍVOT</span><span class="pname">+ Seleccionar</span></button></div></div><div class="tools"><button onclick="clearCourt()">Mandar quinteto al banquillo</button></div><div class="muted" id="selected-slot-label" style="font-size:12px">Toca un jugador en pista y después toca directamente al jugador del banquillo que entra.</div><div id="player-actions" class="panel" style="display:none;margin-top:10px;padding:10px;background:#0d1726"><h3 id="action-player-title">Acciones de jugador</h3><div class="tools"><button class="primary" onclick="playerAction('Gol')">⚽ Gol</button><button class="blue" onclick="playerAction('Asistencia')">🅰️ Asistencia</button><button class="warning" onclick="playerAction('Amarilla')">🟨 Amarilla</button><button class="warning" onclick="playerAction('Doble amarilla')">🟨🟨 Doble amarilla</button><button class="danger" onclick="playerAction('Roja directa')">🟥 Roja directa</button><button onclick="clearSelectedPlayer()">Cerrar</button></div></div></div>
 <div class="panel"><h2>Banquillo y convocados <span id="callup-count" class="tag">0/14</span></h2><div class="tools"><button class="small" onclick="switchView('plantilla')">Editar plantilla</button><button class="small" onclick="toggleBenchFilter()" id="bench-filter">Ver todas las convocados</button></div><div id="bench" class="bench-list"></div></div></div></section>
 <section id="view-plantilla" class="view"><div class="layout"><div class="panel"><h2>Editar jugadores</h2><div class="grid2"><div class="field"><label>Dorsal</label><input id="new-number" type="number" min="0" max="99" placeholder="10"></div><div class="field"><label>Nombre</label><input id="new-name" placeholder="Nombre de jugador"></div></div><button class="primary" onclick="addPlayer()">+ Añadir jugador</button><button class="blue" onclick="saveTemplate()" style="width:100%;margin-top:8px">Guardar plantilla para próximos partidos</button><p id="template-status" class="muted" style="font-size:12px;margin:8px 0">Los cambios se aplican al momento. Guarda la plantilla para conservarla como plantilla base.</p><div id="roster-editor" class="bench-list" style="margin-top:12px"></div></div><div class="panel"><h2>Convocatoria</h2><p class="muted" style="font-size:13px">Marca la casilla de cada jugador que puede participar en este partido. Máximo 14.</p><div id="callup-editor" class="bench-list"></div></div></div></section>
 <section id="view-estadisticas" class="view"><div class="panel"><h2>Estadísticas del partido actual</h2><div class="tools"><button class="primary" onclick="exportPDF('view-estadisticas')">Exportar estadísticas PDF</button><button onclick="exportCSV()">Exportar CSV para Excel</button><button onclick="exportBackup()">Copia de seguridad JSON</button><label class="small" style="background:#26364b;border-radius:10px;padding:8px 10px;cursor:pointer">Restaurar copia<input type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)"></label></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Jugador</th><th>Tiempo total</th><th>1.ª parte</th><th>2.ª parte</th><th>Goles</th><th>Asist.</th><th>Goles a favor en pista</th><th>Goles en contra en pista</th><th>Tarjetas</th></tr></thead><tbody id="stats-body"></tbody></table></div></div></section>
-<section id="view-generales" class="view"><div class="panel"><h2>Estadísticas generales por competición</h2><p class="muted" style="font-size:13px">Elige una competición para ver el acumulado de sus partidos. El historial conserva todos los encuentros.</p><div class="field" style="max-width:420px"><label for="stats-competition-filter">Ver estadísticas de</label><select id="stats-competition-filter" onchange="renderStats()"><option value="__all__">Todas las competiciones</option></select></div><div class="tools"><button class="primary" onclick="exportPDF('view-generales')">Exportar estadísticas generales a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Jugador</th><th>Partidos</th><th>Tiempo total</th><th>Goles</th><th>Asist.</th><th>Goles a favor en pista</th><th>Goles en contra en pista</th><th>Amarillas</th><th>Doble amarilla</th><th>Rojas</th></tr></thead><tbody id="career-stats-body"></tbody></table></div></div></section>
-<section id="view-historial" class="view"><div class="panel"><h2>Historial de partidos</h2><p class="muted" style="font-size:13px">Los partidos guardados aparecerán aquí. Puedes eliminar individualmente los partidos de prueba.</p><div class="tools"><button class="primary" onclick="exportPDF('view-historial')">Exportar historial a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Fecha</th><th>Local/visitante</th><th>Equipo</th><th>Rival</th><th>Competición</th><th>Resultado</th><th>Eventos</th><th>Acciones</th></tr></thead><tbody id="match-history-body"></tbody>
+<section id="view-generales" class="view"><div class="panel"><h2>Estadísticas generales por competición</h2><p class="muted" style="font-size:13px">Elige una competición para ver el acumulado de sus partidos. El historial conserva todos los encuentros.</p><div class="field" style="max-width:420px"><label for="stats-competition-filter">Ver estadísticas de</label><select id="stats-competition-filter" onchange="renderStats()"><option value="__all__">Todas las competiciones</option></select></div><div class="tools"><button class="primary" onclick="exportPDF('view-generales')">Exportar estadísticas generales a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Jugador</th><th>Convocatorias</th><th>Partidos con datos</th><th>Tiempo total</th><th>Goles</th><th>Asist.</th><th>Goles a favor en pista</th><th>Goles en contra en pista</th><th>Amarillas</th><th>Doble amarilla</th><th>Rojas</th></tr></thead><tbody id="career-stats-body"></tbody></table></div></div></section>
+<section id="view-historial" class="view"><div class="panel"><h2>Historial de partidos</h2><p class="muted" style="font-size:13px">Los partidos guardados aparecerán aquí. Puedes eliminar individualmente los partidos de prueba.</p><div class="tools"><button class="primary" onclick="createManualMatch()">+ Crear partido manual</button><button class="primary" onclick="exportPDF('view-historial')">Exportar historial a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Fecha</th><th>Local/visitante</th><th>Equipo</th><th>Rival</th><th>Competición</th><th>Resultado</th><th>Eventos</th><th>Acciones</th></tr></thead><tbody id="match-history-body"></tbody>
 </table>
 </div>
 
@@ -121,15 +121,91 @@ function renderStats(){
  document.getElementById('stats-body').innerHTML=S.players.map(p=>{const cards=(p.yellows||0)?'🟨 '+p.yellows+(p.doubleYellows?' (dobles: '+p.doubleYellows+')':''):'—';const allCards=cards+(p.reds?' · 🟥 '+p.reds:'')+(p.ejected?' · EXPULSADO':'');return `<tr><td>#${esc(p.number)} ${esc(p.name)}</td><td>${formatTime(p.secondsP1+p.secondsP2)}</td><td>${formatTime(p.secondsP1)}</td><td>${formatTime(p.secondsP2)}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.goalsFor||0}</td><td>${p.goalsAgainst||0}</td><td>${allCards}</td></tr>`}).join('');
  const all=[...S.matchHistory]; if(matchHasActivity()) all.push(snapshotMatch('Partido actual',false));
  const selectedComp=document.getElementById('stats-competition-filter')?.value||'__all__'; const filteredAll=selectedComp==='__all__'?all:all.filter(m=>(m.competition||'')===selectedComp);
- const agg=new Map(); filteredAll.forEach(m=>(m.players||[]).filter(p=>((p.secondsP1||0)+(p.secondsP2||0)>0)||(p.goals||0)||(p.assists||0)||(p.goalsFor||0)||(p.goalsAgainst||0)||(p.yellows||0)||(p.doubleYellows||0)||(p.reds||0)).forEach(p=>{const k=String(p.playerId??(p.number+'-'+p.name));if(!agg.has(k))agg.set(k,{number:p.number,name:p.name,matches:0,seconds:0,goals:0,assists:0,gf:0,ga:0,yellows:0,doubleYellows:0,reds:0,seen:new Set()});const a=agg.get(k);a.number=p.number;a.name=p.name;if(!a.seen.has(m.id)){a.matches++;a.seen.add(m.id)}a.seconds+=p.secondsP1+p.secondsP2;a.goals+=p.goals||0;a.assists+=p.assists||0;a.gf+=p.goalsFor||0;a.ga+=p.goalsAgainst||0;a.yellows+=p.yellows||0;a.doubleYellows+=p.doubleYellows||0;a.reds+=p.reds||0;}));
- document.getElementById('career-stats-body').innerHTML=[...agg.values()].sort((a,b)=>Number(a.number)-Number(b.number)).map(a=>`<tr><td>#${esc(a.number)} ${esc(a.name)}</td><td>${a.matches}</td><td>${formatTime(a.seconds)}</td><td>${a.goals}</td><td>${a.assists}</td><td>${a.gf}</td><td>${a.ga}</td><td>${a.yellows}</td><td>${a.doubleYellows}</td><td>${a.reds}</td></tr>`).join('')||'<tr><td colspan="10">Todavía no hay estadísticas registradas.</td></tr>';
- const history=[...S.matchHistory];if(matchHasActivity())history.push(snapshotMatch('Partido actual',false));document.getElementById('match-history-body').innerHTML=history.slice().reverse().map(m=>`<tr><td>${esc(m.dateLabel||m.date||'—')}</td><td>${esc(m.venue||'—')}</td><td>${esc(m.teamName||'Equipo')}</td><td>${esc(m.rivalName||'—')}</td><td>${esc(m.competition||'—')}</td><td>${m.scoreNos??0} - ${m.scoreRiv??0}${m.status==='actual'?' (actual)':''}</td><td>${(m.events||[]).length}</td><td>${m.status==='actual'?'—':`<button class="primary small" onclick="viewSavedMatch('${m.id}')">Ver estadísticas</button> <button class="danger small" onclick="deleteSavedMatch('${m.id}')">Eliminar</button>`}</td></tr>`).join('')||'<tr><td colspan="8">Los partidos guardados aparecerán aquí.</td></tr>';
+ const agg=new Map();
+
+filteredAll.forEach(m=>{
+ const hasData=p=>
+  ((p.secondsP1||0)+(p.secondsP2||0)>0)||
+  (p.goals||0)||(p.assists||0)||
+  (p.goalsFor||0)||(p.goalsAgainst||0)||
+  (p.yellows||0)||(p.doubleYellows||0)||(p.reds||0);
+
+ const dataPlayers=m.players||[];
+ const calledPlayers=Array.isArray(m.roster)
+  ?m.roster
+  :dataPlayers.filter(hasData);
+
+ const getKey=p=>String(p.playerId??(p.number+'-'+p.name));
+
+ calledPlayers.forEach(p=>{
+  const k=getKey(p);
+  if(!agg.has(k))agg.set(k,{
+   number:p.number,name:p.name,
+   convocations:0,matches:0,seconds:0,
+   goals:0,assists:0,gf:0,ga:0,
+   yellows:0,doubleYellows:0,reds:0,
+   calledSeen:new Set(),seen:new Set()
+  });
+  const a=agg.get(k);
+  a.number=p.number;
+  a.name=p.name;
+  if(!a.calledSeen.has(m.id)){
+   a.convocations++;
+   a.calledSeen.add(m.id);
+  }
+ });
+
+ dataPlayers.filter(hasData).forEach(p=>{
+  const k=getKey(p);
+  if(!agg.has(k))agg.set(k,{
+   number:p.number,name:p.name,
+   convocations:0,matches:0,seconds:0,
+   goals:0,assists:0,gf:0,ga:0,
+   yellows:0,doubleYellows:0,reds:0,
+   calledSeen:new Set(),seen:new Set()
+  });
+  const a=agg.get(k);
+  a.number=p.number;
+  a.name=p.name;
+  if(!a.seen.has(m.id)){
+   a.matches++;
+   a.seen.add(m.id);
+  }
+  a.seconds+=(p.secondsP1||0)+(p.secondsP2||0);
+  a.goals+=p.goals||0;
+  a.assists+=p.assists||0;
+  a.gf+=p.goalsFor||0;
+  a.ga+=p.goalsAgainst||0;
+  a.yellows+=p.yellows||0;
+  a.doubleYellows+=p.doubleYellows||0;
+  a.reds+=p.reds||0;
+ });
+});
+ document.getElementById('career-stats-body').innerHTML=
+[...agg.values()]
+.sort((a,b)=>Number(a.number)-Number(b.number))
+.map(a=>`<tr>
+<td>#${esc(a.number)} ${esc(a.name)}</td>
+<td>${a.convocations}</td>
+<td>${a.matches}</td>
+<td>${formatTime(a.seconds)}</td>
+<td>${a.goals}</td>
+<td>${a.assists}</td>
+<td>${a.gf}</td>
+<td>${a.ga}</td>
+<td>${a.yellows}</td>
+<td>${a.doubleYellows}</td>
+<td>${a.reds}</td>
+</tr>`).join('')||
+'<tr><td colspan="11">Todavía no hay estadísticas registradas.</td></tr>';
+ const history=[...S.matchHistory];if(matchHasActivity())history.push(snapshotMatch('Partido actual',false));document.getElementById('match-history-body').innerHTML=history.slice().reverse().map(m=>`<tr><td>${esc(m.dateLabel||m.date||'—')}</td><td>${esc(m.venue||'—')}</td><td>${esc(m.teamName||'Equipo')}</td><td>${esc(m.rivalName||'—')}${m.manual?' (MANUAL)':''}</td><td>${esc(m.competition||'—')}</td><td>${m.scoreNos??0} - ${m.scoreRiv??0}${m.status==='actual'?' (actual)':''}</td><td>${(m.events||[]).length}</td><td>${m.status==='actual'?'—':`<button class="primary small" onclick="viewSavedMatch('${m.id}')">Ver estadísticas</button> <button class="primary small" onclick="editSavedMatch('${m.id}')">Editar</button> <button class="danger small" onclick="deleteSavedMatch('${m.id}')">Eliminar</button>`}</td></tr>`).join('')||'<tr><td colspan="8">Los partidos guardados aparecerán aquí.</td></tr>';
 }
   function viewSavedMatch(id){
  const m=S.matchHistory.find(x=>String(x.id)===String(id));
  if(!m)return;
  const playerName=id=>{
-  const p=(m.players||[]).find(x=>String(x.playerId)===String(id));
+  const p=(m.players||[]).find(x=>String(x.playerId)===String(id))
+   ||(m.roster||[]).find(x=>String(x.playerId)===String(id));
   return p?'#'+p.number+' '+p.name:'—';
  };
  document.getElementById('saved-match-info').innerHTML=
@@ -157,7 +233,8 @@ function renderStats(){
    }else if(e.type==='Acción de jugador'){
     detail=' · '+esc(playerName(e.playerId))+': '+esc(e.action||'');
    }
-   return `<div class="event"><strong>${esc(e.type||'Evento')}</strong> · ${esc(e.period||'')}ª parte · ${esc(e.time||'')}${detail}</div>`;
+   const when=(e.period?e.period+'ª parte · ':'')+(e.time&&e.time!=='Sin registrar'?e.time:'Tiempo sin registrar');
+return `<div class="event"><strong>${esc(e.type||'Evento')}</strong> · ${esc(when)}${detail}</div>`;
   }).join('')||'<p>No hay eventos registrados.</p>';
  document.getElementById('match-history-body').closest('.table-wrap').style.display='none';
  document.getElementById('saved-match-detail').style.display='block';
@@ -166,8 +243,300 @@ function closeSavedMatch(){
  document.getElementById('saved-match-detail').style.display='none';
  document.getElementById('match-history-body').closest('.table-wrap').style.display='';
 }
+function editSavedMatch(id){
+ const m=S.matchHistory.find(x=>String(x.id)===String(id));
+ if(!m)return;
+ const d=JSON.parse(JSON.stringify(m));
+ const ask=(label,value)=>{
+  const v=prompt(label,value??'');
+  return v===null?null:v.trim();
+ };
+ const num=(label,value)=>{
+  const v=ask(label,value);
+  if(v===null)return null;
+  const n=Number(v);
+  return Number.isFinite(n)&&n>=0?n:null;
+ };
+ let v;
+ v=ask('Fecha del partido',d.dateLabel||'');if(v===null)return;d.dateLabel=v;
+ v=ask('Nombre de nuestro equipo',d.teamName||'');if(v===null)return;d.teamName=v;
+ v=ask('Nombre del rival',d.rivalName||'');if(v===null)return;d.rivalName=v;
+ v=ask('Competición',d.competition||'');if(v===null)return;d.competition=v;
+ v=ask('Local o visitante',d.venue||'Local');if(v===null)return;d.venue=v;
+ const fields=[
+  ['Goles de nuestro equipo','scoreNos'],
+  ['Goles del rival','scoreRiv'],
+  ['Faltas de nuestro equipo','foulsNos'],
+  ['Faltas del rival','foulsRiv']
+ ];
+ for(const [label,key,isMinutes] of fields){
+  v=num(label,isMinutes?Math.round((d[key]||0)/60):(d[key]||0));
+  if(v===null)return;
+  d[key]=isMinutes?Math.round(v*60):v;
+ }
+ for(const p of d.players||[]){
+  if(!confirm('¿Editar las estadísticas de #'+p.number+' '+p.name+'?'))continue;
+  const stats=[
+   ['Goles','goals'],['Asistencias','assists'],
+   ['Minutos 1.ª parte','secondsP1',true],
+  ['Minutos 2.ª parte','secondsP2',true],
+   ['Goles a favor en pista','goalsFor'],
+   ['Goles en contra en pista','goalsAgainst'],
+   ['Amarillas','yellows'],['Dobles amarillas','doubleYellows'],
+   ['Rojas','reds']
+  ];
+  for(const [label,key] of stats){
+   v=num(p.name+' — '+label,p[key]||0);
+   if(v===null)return;
+   p[key]=v;
+  }
+ }
+ if(!confirm('¿Guardar los cambios de este partido?'))return;
+ const index=S.matchHistory.findIndex(x=>String(x.id)===String(id));
+ if(index<0)return;
+S.matchHistory[index]=d;
+save();
+
+// Marcar los cambios como pendientes de sincronización.
+try{
+ const key='AP_FUTSAL_CLOUD_PENDING';
+ const pending=JSON.parse(localStorage.getItem(key)||'[]');
+ if(!pending.includes(d.id))pending.push(d.id);
+ localStorage.setItem(key,JSON.stringify(pending));
+ if(navigator.onLine && typeof cloudSyncPending==='function'){
+  setTimeout(()=>cloudSyncPending(),1500);
+ }
+}catch(e){
+ console.warn('No se pudo marcar la sincronización:',e);
+}
+
+renderStats();
+alert('Partido actualizado. Queda pendiente de sincronización si no hay conexión.');
+}
+}  
+function createManualMatch(){
+ const ask=(label,value='')=>prompt(label,value);
+ const number=(label,value=0)=>{
+  const v=ask(label,String(value));
+  if(v===null)return null;
+  const n=Number(v);
+  return Number.isFinite(n)&&n>=0?n:null;
+ };
+ const date=ask('Fecha del partido (DD/MM/AAAA)',new Date().toLocaleDateString('es-ES'));
+ if(date===null)return;
+ const team=ask('Nombre de nuestro equipo',S.teamName||'Nosotros');if(team===null)return;
+ const rival=ask('Nombre del rival','');if(rival===null)return;
+ const competition=ask('Competición',S.competition||'');if(competition===null)return;
+ const venue=ask('Local o Visitante','Local');if(venue===null)return;
+ const scoreNos=number('Goles de nuestro equipo');if(scoreNos===null)return;
+ const scoreRiv=number('Goles del rival');if(scoreRiv===null)return;
+ const foulsNos=number('Faltas de nuestro equipo');if(foulsNos===null)return;
+ const foulsRiv=number('Faltas del rival');if(foulsRiv===null)return;
+const roster=[];
+for(const p of S.players){
+ if(confirm('¿Estuvo convocado #'+p.number+' '+p.name+'?')){
+  roster.push({
+   playerId:p.id,
+   number:p.number,
+   name:p.name
+  });
+ }
+}
+  const players=[];
+  const getManualStatPlayer=player=>{
+   let stat=players.find(p=>String(p.playerId)===String(player.id));
+ if(!stat){
+  stat={
+   playerId:player.id,
+   number:player.number,
+   name:player.name,
+   secondsP1:0,
+   secondsP2:0,
+   goals:0,
+   assists:0,
+   goalsFor:0,
+   goalsAgainst:0,
+   yellows:0,
+   doubleYellows:0,
+   reds:0
+  };
+  players.push(stat);
+ }
+ return stat;
+};
+ for(const p of S.players){
+  if(!roster.some(r=>String(r.playerId)===String(p.id)))continue;
+  if(!confirm('¿Añadir estadísticas de #'+p.number+' '+p.name+'?'))continue;
+  const p2={playerId:p.id,number:p.number,name:p.name};
+  const fields=[
+   ['Minutos jugados en 1.ª parte','secondsP1',true],
+   ['Minutos jugados en 2.ª parte','secondsP2',true],
+   ['Goles a favor en pista','goalsFor'],
+   ['Goles en contra en pista','goalsAgainst'],
+  ];
+  for(const [label,key,isMinutes] of fields){
+   const n=number(p.name+' — '+label);
+   if(n===null)return;
+   p2[key]=isMinutes?Math.round(n*60):n;
+  }
+  players.push(p2);
+ }
+  const events=[];
+  // Registrar tarjetas de todos los convocados,
+// independientemente de sus minutos o estadísticas.
+for(const p of roster){
+ const yellows=number('Tarjetas amarillas de #'+p.number+' '+p.name);
+ if(yellows===null)return;
+
+ const doubleYellows=number('Dobles amarillas de #'+p.number+' '+p.name);
+ if(doubleYellows===null)return;
+
+ const reds=number('Tarjetas rojas de #'+p.number+' '+p.name);
+ if(reds===null)return;
+
+ const simpleYellows=Math.max(0,yellows-2*doubleYellows);
+
+ const stat=getManualStatPlayer(
+  S.players.find(x=>String(x.id)===String(p.playerId))
+ );
+
+ stat.yellows=yellows;
+ stat.doubleYellows=doubleYellows;
+ stat.reds=reds;
+
+ const addCard=(action,count)=>{
+  for(let i=0;i<count;i++)events.push({
+   id:'manual-card-'+Date.now()+'-'+Math.random(),
+   type:'Acción de jugador',
+   action,
+   playerId:p.playerId,
+   period:null,
+   time:'Sin registrar',
+   quintet:[]
+  });
+ };
+
+ addCard('Amarilla',simpleYellows);
+ addCard('Doble amarilla',doubleYellows);
+ addCard('Roja directa',reds);
+}
+   
+ let currentNos=0;
+ let currentRiv=0;
+
+ const manualQuintet=()=>{
+  const raw=prompt('Introduce los 5 dorsales del quinteto separados por comas. Déjalo vacío si no lo sabes.');
+  if(raw===null)return null;
+  if(!raw.trim())return [];
+  const nums=raw.split(',').map(x=>x.trim());
+  if(nums.length!==5){alert('Introduce exactamente 5 dorsales o deja el campo vacío.');return null;}
+  const ids=nums.map(n=>{
+   const p=roster.find(x=>String(x.number)===n);
+   return p?p.playerId:null;
+  });
+  if(ids.some(x=>x===null)||new Set(ids).size!==5){
+   alert('Hay algún dorsal incorrecto o repetido.');return null;
+  }
+  return ids;
+ };
+
+ for(let i=1;i<=scoreNos;i++){
+  const scorerRaw=prompt('Gol '+i+'/'+scoreNos+' de nuestro equipo. Dorsal del goleador (vacío si no se sabe):');
+  if(scorerRaw===null)return;
+  const scorerPlayer=scorerRaw.trim()?S.players.find(p=>String(p.number)===scorerRaw.trim()&&roster.some(r=>String(r.playerId)===String(p.id))):null;
+  if(scorerRaw.trim()&&!scorerPlayer){alert('Dorsal de goleador no encontrado.');return;}
+
+  const assistRaw=prompt('Dorsal del asistente (vacío si no hubo o no se sabe):');
+  if(assistRaw===null)return;
+  const assistPlayer=assistRaw.trim()?S.players.find(p=>String(p.number)===assistRaw.trim()&&roster.some(r=>String(r.playerId)===String(p.id))):null;
+  if(assistRaw.trim()&&!assistPlayer){alert('Dorsal de asistente no encontrado.');return;}
+
+  const quintet=manualQuintet();
+  if(quintet===null)return;
+  currentNos++;
+ if(scorerPlayer){
+ const statPlayer=getManualStatPlayer(scorerPlayer);
+ statPlayer.goals=(statPlayer.goals||0)+1;
+}
+
+if(assistPlayer){
+ const statAssist=getManualStatPlayer(assistPlayer);
+ statAssist.assists=(statAssist.assists||0)+1;
+}
+
+events.push({
+ id:'manual-event-'+Date.now()+'-'+i,
+ type:'Gol a favor',
+ period:null,
+ time:'Sin registrar',
+ scorer:scorerPlayer?scorerPlayer.id:null,
+ assist:assistPlayer?assistPlayer.id:null,
+ quintet,
+ scoreNos:currentNos,
+ scoreRiv:currentRiv
+});
+ }
+
+for(let i=1;i<=scoreRiv;i++){
+  const quintet=manualQuintet();
+  if(quintet===null)return;
+  currentRiv++;
+  events.push({
+   id:'manual-event-rival-'+Date.now()+'-'+i,
+   type:'Gol en contra',
+   period:null,
+   time:'Sin registrar',
+   scorer:null,
+   assist:null,
+   quintet,
+   scoreNos:currentNos,
+   scoreRiv:currentRiv
+  });
+ }
+ const match={
+  id:'manual-'+Date.now(),
+  date:new Date().toISOString(),
+  dateLabel:date,
+  teamName:team,
+  rivalName:rival,
+  competition,
+  venue,
+  scoreNos,scoreRiv,foulsNos,foulsRiv,
+  status:'archived',
+  source:'manual',
+  manual:true,
+  events,
+players,
+roster,
+ };
+ if(!confirm('¿Crear este partido manual en el historial?'))return;
+S.matchHistory.push(match);
+save();
+
+// Marcar el partido manual como pendiente de sincronización.
+try{
+ const key='AP_FUTSAL_CLOUD_PENDING';
+ const pending=JSON.parse(localStorage.getItem(key)||'[]');
+ if(!pending.includes(match.id))pending.push(match.id);
+ localStorage.setItem(key,JSON.stringify(pending));
+ if(navigator.onLine && typeof cloudSyncPending==='function'){
+  setTimeout(()=>cloudSyncPending(),1500);
+ }
+}catch(e){
+ console.warn('No se pudo marcar la sincronización:',e);
+}
+
+renderStats();
+alert('Partido manual añadido al historial. Queda pendiente de sincronización si no hay conexión.');
+}
 function matchHasActivity(){return (S.events||[]).length>0||S.scoreNos>0||S.scoreRiv>0||S.players.some(p=>(p.secondsP1||0)+(p.secondsP2||0)>0)}
-function snapshotMatch(label='Partido',archived=true){const date=new Date();return {id:label==='Partido actual'?'current':('m-'+date.getTime()),date:date.toISOString(),dateLabel:date.toLocaleDateString('es-ES'),teamName:S.teamName||'Equipo',rivalName:S.rivalName||'Rival',competition:S.competition||'',venue:S.venue||'Local',scoreNos:S.scoreNos,scoreRiv:S.scoreRiv,foulsNos:S.foulsNos||0,foulsRiv:S.foulsRiv||0,status:archived?'archived':'actual',events:JSON.parse(JSON.stringify(S.events||[])),players:S.players.map(p=>({playerId:p.id,number:p.number,name:p.name,secondsP1:p.secondsP1||0,secondsP2:p.secondsP2||0,goals:p.goals||0,assists:p.assists||0,goalsFor:p.goalsFor||0,goalsAgainst:p.goalsAgainst||0,yellows:p.yellows||0,doubleYellows:p.doubleYellows||0,reds:p.reds||0}))}}
+function snapshotMatch(label='Partido',archived=true){const date=new Date();return {id:label==='Partido actual'?'current':('m-'+date.getTime()),date:date.toISOString(),dateLabel:date.toLocaleDateString('es-ES'),teamName:S.teamName||'Equipo',rivalName:S.rivalName||'Rival',competition:S.competition||'',venue:S.venue||'Local',scoreNos:S.scoreNos,scoreRiv:S.scoreRiv,foulsNos:S.foulsNos||0,foulsRiv:S.foulsRiv||0,status:archived?'archived':'actual',
+roster:S.players.filter(p=>p.called).map(p=>({
+ playerId:p.id,
+ number:p.number,
+ name:p.name
+})),
+events:JSON.parse(JSON.stringify(S.events||[])),players:S.players.map(p=>({playerId:p.id,number:p.number,name:p.name,secondsP1:p.secondsP1||0,secondsP2:p.secondsP2||0,goals:p.goals||0,assists:p.assists||0,goalsFor:p.goalsFor||0,goalsAgainst:p.goalsAgainst||0,yellows:p.yellows||0,doubleYellows:p.doubleYellows||0,reds:p.reds||0}))}}
 function archiveCurrentMatch(){if(!matchHasActivity())return;const m=snapshotMatch('Partido',true);m.id='m-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);S.matchHistory.push(m)}
 
 function switchView(name){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+name));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===name));if(name==='estadisticas'||name==='generales'||name==='historial')renderStats();if(name==='plantilla')renderRoster()}
@@ -190,7 +559,28 @@ function importBackup(e){const f=e.target.files[0];if(!f)return;const rd=new Fil
 function download(data,name,type){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([data],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function saveCurrentMatch(){syncClock();if(!matchHasActivity()){alert('Este partido está vacío. Registra algún dato antes de guardarlo.');return;}const m=snapshotMatch('Partido',true);m.id='m-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);m.status='archived';S.matchHistory.push(m);S.running=false;S.startedAt=null;S.endAt=null;S.scoreNos=0;S.scoreRiv=0;S.foulsNos=0;S.foulsRiv=0;S.period=1;S.remaining=S.halfLength*60;S.startRemaining=S.remaining;S.lastElapsedSynced=0;S.slots=[null,null,null,null,null];S.events=[];S.players.forEach(p=>{p.secondsP1=0;p.secondsP2=0;p.goals=0;p.assists=0;p.goalsFor=0;p.goalsAgainst=0;p.yellows=0;p.doubleYellows=0;p.reds=0;p.ejected=false;p.plusMinus=0});save();renderAll();switchView('partido');alert('Partido guardado en el historial con sus estadísticas y eventos. El partido actual se ha dejado en blanco para el siguiente.');}
 function deleteCurrentMatch(){if(!confirm('¿Eliminar TODOS los datos del partido actual (marcador, tiempos, goles, tarjetas y eventos)? Los partidos ya guardados en el historial y la plantilla base se conservarán.'))return;S.running=false;S.startedAt=null;S.endAt=null;S.scoreNos=0;S.scoreRiv=0;S.foulsNos=0;S.foulsRiv=0;S.period=1;S.remaining=S.halfLength*60;S.startRemaining=S.remaining;S.lastElapsedSynced=0;S.slots=[null,null,null,null,null];S.events=[];S.players.forEach(p=>{p.secondsP1=0;p.secondsP2=0;p.goals=0;p.assists=0;p.goalsFor=0;p.goalsAgainst=0;p.yellows=0;p.doubleYellows=0;p.reds=0;p.ejected=false;p.plusMinus=0});save();renderAll();switchView('partido');alert('Partido actual eliminado. La plantilla guardada y el historial no se han borrado.');}
-function deleteSavedMatch(id){if(!confirm('¿Eliminar este partido del historial? Sus estadísticas dejarán de contar en las estadísticas generales.'))return;S.matchHistory=S.matchHistory.filter(m=>m.id!==id);save();renderStats();}
+function deleteSavedMatch(id){
+ if(!confirm('¿Eliminar este partido del historial? Sus estadísticas dejarán de contar en las estadísticas generales.'))return;
+
+ S.matchHistory=S.matchHistory.filter(m=>m.id!==id);
+ save();
+
+ // Marcar la eliminación como pendiente de sincronización.
+ try{
+  const key='AP_FUTSAL_CLOUD_PENDING';
+  const pending=JSON.parse(localStorage.getItem(key)||'[]');
+  if(!pending.includes(id))pending.push(id);
+  localStorage.setItem(key,JSON.stringify(pending));
+
+  if(navigator.onLine && typeof cloudSyncPending==='function'){
+   setTimeout(()=>cloudSyncPending(),1500);
+  }
+ }catch(e){
+  console.warn('No se pudo marcar la sincronización:',e);
+ }
+
+ renderStats();
+}
 function clearMatchHistory(){if(!confirm('¿Borrar TODOS los partidos guardados del historial? Esta acción no se puede deshacer.'))return;S.matchHistory=[];save();renderStats();alert('Historial eliminado. El partido actual no se ha modificado.');}
 function newMatch(){if(!confirm('El partido actual se guardará en el historial y se iniciará otro. La plantilla y las estadísticas generales se conservarán. ¿Continuar?'))return;syncClock();archiveCurrentMatch();S.running=false;S.startedAt=null;S.endAt=null;S.scoreNos=0;S.scoreRiv=0;S.foulsNos=0;S.foulsRiv=0;S.period=1;S.remaining=S.halfLength*60;S.startRemaining=S.remaining;S.slots=[null,null,null,null,null];S.events=[];S.players.forEach(p=>{p.secondsP1=0;p.secondsP2=0;p.goals=0;p.assists=0;p.goalsFor=0;p.goalsAgainst=0;p.yellows=0;p.doubleYellows=0;p.reds=0;p.ejected=false;p.plusMinus=0});save();renderAll();switchView('partido')}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
