@@ -398,6 +398,17 @@ let savedMatchEditing=false;
  return getSavedMatchPlayers(m).map(p=>{
    const extraSeconds=p.secondsExtra!==undefined?(p.secondsExtra||0):(p.secondsP3||0)+(p.secondsP4||0);
    const penaltyAttempts=(m.events||[]).filter(e=>e.type==='Penalti'&&String(e.playerId)===String(p.playerId)).map(e=>e.result);
+   const attempts=p.penaltyAttempts&&p.penaltyAttempts.length?p.penaltyAttempts:penaltyAttempts;
+
+const penaltyCell=savedMatchEditing
+ ? `<input type="text"
+    value="${attempts.map(a=>a==='scored'?'M':'F').join('')}"
+    placeholder="MFM"
+    data-player-id="${esc(p.playerId)}"
+    data-field="penaltyAttempts"
+    style="width:65px;padding:5px"
+    onchange="updateSavedMatchPlayerField(this)">`
+ : attempts.map(a=>'<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:'+(a==='scored'?'#16a34a':'#dc2626')+';margin:2px"></span>').join('')||'—';
   const field=(key,value,time=false)=>{
    if(!savedMatchEditing)return time?formatTime(value||0):(value||0);
    return `<input
