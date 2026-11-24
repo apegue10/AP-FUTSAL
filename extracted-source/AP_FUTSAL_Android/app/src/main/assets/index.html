@@ -471,9 +471,64 @@ function toggleSavedMatchEdit(){
    const metadata=document.getElementById('saved-match-metadata-edit');
  metadata.style.display='block';
  metadata.innerHTML=`
-  <h3>Datos generales del partido</h3>
-  <p>Estamos preparando los campos de edición.</p>
- `;
+ <h3>Datos generales del partido</h3>
+
+ <div class="field">
+  <label>Fecha</label>
+  <input type="date" value="${String(savedMatchEditDraft.date||'').slice(0,10)}"
+   onchange="updateSavedMatchMetadata('date',this.value)">
+ </div>
+
+ <div class="field">
+  <label>Nombre de nuestro equipo</label>
+  <input type="text" value="${esc(savedMatchEditDraft.teamName||'')}"
+   onchange="updateSavedMatchMetadata('teamName',this.value)">
+ </div>
+
+ <div class="field">
+  <label>Nombre del rival</label>
+  <input type="text" value="${esc(savedMatchEditDraft.rivalName||'')}"
+   onchange="updateSavedMatchMetadata('rivalName',this.value)">
+ </div>
+
+ <div class="field">
+  <label>Local o visitante</label>
+  <select onchange="updateSavedMatchMetadata('venue',this.value)">
+   <option value="Local" ${savedMatchEditDraft.venue==='Local'?'selected':''}>Local</option>
+   <option value="Visitante" ${savedMatchEditDraft.venue==='Visitante'?'selected':''}>Visitante</option>
+  </select>
+ </div>
+
+ <div class="field">
+  <label>Competición</label>
+  <input type="text" value="${esc(savedMatchEditDraft.competition||'')}"
+   onchange="updateSavedMatchMetadata('competition',this.value)">
+ </div>
+
+ <div class="field">
+  <label>Goles de nuestro equipo</label>
+  <input type="number" min="0" value="${savedMatchEditDraft.scoreNos||0}"
+   onchange="updateSavedMatchMetadata('scoreNos',this.value)">
+ </div>
+
+ <div class="field">
+  <label>Goles del rival</label>
+  <input type="number" min="0" value="${savedMatchEditDraft.scoreRiv||0}"
+   onchange="updateSavedMatchMetadata('scoreRiv',this.value)">
+ </div>
+
+ <div class="field">
+  <label>Faltas de nuestro equipo</label>
+  <input type="number" min="0" value="${savedMatchEditDraft.foulsNos||0}"
+   onchange="updateSavedMatchMetadata('foulsNos',this.value)">
+ </div>
+
+ <div class="field">
+  <label>Faltas del rival</label>
+  <input type="number" min="0" value="${savedMatchEditDraft.foulsRiv||0}"
+   onchange="updateSavedMatchMetadata('foulsRiv',this.value)">
+ </div>
+`;
  document.getElementById('saved-match-players').innerHTML=
   renderSavedMatchPlayerRows(savedMatchEditDraft);
  document.getElementById('saved-match-edit-button').style.display='none';
