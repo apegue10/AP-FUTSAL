@@ -444,6 +444,13 @@ ${m.penaltiesOccurred?'<td>'+penaltyCell+'</td>':''}
  savedMatchEditId=id;
  savedMatchEditDraft=JSON.parse(JSON.stringify(m));
  savedMatchEditing=false;
+      const metadata=document.getElementById('saved-match-metadata-edit');
+  metadata.style.display='none';
+  metadata.innerHTML='';
+
+  document.getElementById('saved-match-edit-button').style.display='';
+  document.getElementById('saved-match-save-button').style.display='none';
+  document.getElementById('saved-match-cancel-button').style.display='none';
  const playerName=id=>{
   const p=(m.players||[]).find(x=>String(x.playerId)===String(id))
    ||(m.roster||[]).find(x=>String(x.playerId)===String(id));
