@@ -855,7 +855,28 @@ statsList.innerHTML=`
  document.getElementById('manual-match-details-step').style.display='none';
  document.getElementById('manual-match-stats-step').style.display='block';
 }
+function updateManualStatTotal(i){
+ const readSeconds=(selector)=>{
+  const input=document.querySelector(selector);
+  if(!input)return 0;
 
+  const match=input.value.trim().match(/^(\d+):([0-5]\d)$/);
+  return match?Number(match[1])*60+Number(match[2]):0;
+ };
+
+ const p1=readSeconds('.manual-stat-p1[data-index="'+i+'"]');
+ const p2=readSeconds('.manual-stat-p2[data-index="'+i+'"]');
+ const extra=readSeconds('.manual-stat-extra[data-index="'+i+'"]');
+
+ const total=p1+p2+extra;
+ const minutes=Math.floor(total/60);
+ const seconds=total%60;
+
+ const cell=document.querySelector('.manual-stat-total[data-index="'+i+'"]');
+ if(cell){
+  cell.textContent=String(minutes).padStart(2,'0')+':'+String(seconds).padStart(2,'0');
+ }
+}
 function manualMatchCollectStats(){
  const players=[];
 
