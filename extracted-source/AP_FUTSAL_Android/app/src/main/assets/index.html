@@ -708,7 +708,16 @@ if(editedMatch.manualFormVersion===2){
 
  editedMatch.events=[...preservedEvents,...rebuiltEvents];
 }
-
+editedMatch.date=savedMatchEditDraft.date;
+editedMatch.dateLabel=savedMatchEditDraft.dateLabel;
+editedMatch.teamName=savedMatchEditDraft.teamName;
+editedMatch.rivalName=savedMatchEditDraft.rivalName;
+editedMatch.venue=savedMatchEditDraft.venue;
+editedMatch.competition=savedMatchEditDraft.competition;
+editedMatch.scoreNos=savedMatchEditDraft.scoreNos;
+editedMatch.scoreRiv=savedMatchEditDraft.scoreRiv;
+editedMatch.foulsNos=savedMatchEditDraft.foulsNos;
+editedMatch.foulsRiv=savedMatchEditDraft.foulsRiv;
 editedMatch.players=editedPlayers;
 
  save();
