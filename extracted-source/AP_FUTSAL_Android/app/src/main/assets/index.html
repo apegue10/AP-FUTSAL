@@ -880,6 +880,9 @@ if(editedMatch.manualFormVersion===2){
 
  editedMatch.events=[...preservedEvents,...rebuiltEvents];
 }
+  else{
+ editedMatch.events=JSON.parse(JSON.stringify(savedMatchEditDraft.events||[]));
+  }
 editedMatch.date=savedMatchEditDraft.date;
 editedMatch.dateLabel=savedMatchEditDraft.dateLabel;
 editedMatch.teamName=savedMatchEditDraft.teamName;
