@@ -815,6 +815,7 @@ editedMatch.scoreNos=savedMatchEditDraft.scoreNos;
 editedMatch.scoreRiv=savedMatchEditDraft.scoreRiv;
 editedMatch.foulsNos=savedMatchEditDraft.foulsNos;
 editedMatch.foulsRiv=savedMatchEditDraft.foulsRiv;
+editedMatch.roster=JSON.parse(JSON.stringify(savedMatchEditDraft.roster||[]));
 editedMatch.players=editedPlayers;
 
  save();
