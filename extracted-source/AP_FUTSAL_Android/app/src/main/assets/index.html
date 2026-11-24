@@ -836,7 +836,7 @@ statsList.innerHTML=`
       <td><input type="number" class="manual-stat-assists" data-index="${i}" min="0" value="0" style="width:55px"></td>
       <td><strong class="manual-stat-total" data-index="${i}">00:00</strong></td>
       <td><input type="text" class="manual-stat-p1" data-index="${i}" value="00:00" oninput="updateManualStatTotal(${i})" style="width:65px"></td>
-<td><input type="text" class="manual-stat-p2" data-index="${i}" value="00:00" oninput="updateManualStatTotal(${i})" style="width:65px"></td>      ${window.manualMatchDetails.extraTimeOccurred?'<td><input type="text" class="manual-stat-extra" data-index="'+i+'" value="00:00" style="width:65px"></td>':''}
+<td><input type="text" class="manual-stat-p2" data-index="${i}" value="00:00" oninput="updateManualStatTotal(${i})" style="width:65px"></td>      ${window.manualMatchDetails.extraTimeOccurred?'<td><input type="text" class="manual-stat-extra" data-index="'+i+'" value="00:00" oninput="updateManualStatTotal('+i+')" style="width:65px"></td>':''}
       ${window.manualMatchDetails.penaltiesOccurred?'<td><input type="text" class="manual-stat-penalties" data-index="'+i+'" placeholder="MFM" style="width:65px"></td>':''}
       <td><input type="number" class="manual-stat-yellows" data-index="${i}" min="0" value="0" style="width:50px"></td>
       <td><input type="number" class="manual-stat-double-yellows" data-index="${i}" min="0" value="0" style="width:50px"></td>
