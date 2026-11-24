@@ -801,7 +801,7 @@ if(editedMatch.manualFormVersion===2){
   }
  }
 
- const preservedEvents=(editedMatch.events||[]).filter(e=>
+ const preservedEvents=(savedMatchEditDraft.events||editedMatch.events||[]).filter(e=>
   !['Gol a favor','Gol en contra'].includes(e.type)&&
   !(e.type==='Acción de jugador'&&
     ['Amarilla','Doble amarilla','Roja directa'].includes(e.action))
