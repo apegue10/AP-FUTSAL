@@ -807,31 +807,50 @@ function manualMatchNextToStats(){
 
  const statsList=document.getElementById('manual-match-stats-list');
 
- statsList.innerHTML=window.manualMatchRoster.map((p,i)=>`
-  <div class="player" style="padding:12px;margin:10px 0;border:1px solid var(--border);border-radius:10px">
-   <h3>#${esc(String(p.number))} ${esc(p.name)}</h3>
-   <p>Minutos primera parte (MM:SS)</p>
-   <input type="text" class="manual-stat-p1" data-index="${i}" value="00:00" placeholder="12:35">
-   <p>Minutos segunda parte (MM:SS)</p>
-   <input type="text" class="manual-stat-p2" data-index="${i}" value="00:00" placeholder="12:35">
-      ${window.manualMatchDetails.extraTimeOccurred?'<p>Minutos de prórroga (MM:SS)</p><input type="text" class="manual-stat-extra" data-index="'+i+'" value="00:00" placeholder="05:00">':''}
-   <p>Goles</p>
-   <input type="number" class="manual-stat-goals" data-index="${i}" min="0" value="0">
-   <p>Asistencias</p>
-   <input type="number" class="manual-stat-assists" data-index="${i}" min="0" value="0">
-   <p>Tarjetas amarillas</p>
-   <input type="number" class="manual-stat-yellows" data-index="${i}" min="0" value="0">
-   <p>Dobles amarillas</p>
-   <input type="number" class="manual-stat-double-yellows" data-index="${i}" min="0" value="0">
-   <p>Tarjetas rojas</p>
-   <input type="number" class="manual-stat-reds" data-index="${i}" min="0" value="0">
-   <p>Goles a favor mientras estaba en pista</p>
-   <input type="number" class="manual-stat-goals-for" data-index="${i}" min="0" value="0">
-   <p>Goles en contra mientras estaba en pista</p>
-   <input type="number" class="manual-stat-goals-against" data-index="${i}" min="0" value="0">
-      ${window.manualMatchDetails.penaltiesOccurred?'<p>Penaltis (M = marcado, F = fallado). Ejemplo: MFM</p><input type="text" class="manual-stat-penalties" data-index="'+i+'" placeholder="MFM">':''}
-  </div>
- `).join('');
+
+statsList.innerHTML=`
+ <div class="table-wrap">
+  <table class="stats-table">
+   <thead>
+    <tr>
+     <th>Jugador</th>
+     <th>Goles</th>
+     <th>Asist.</th>
+     <th>Total</th>
+     <th>1.ª parte</th>
+     <th>2.ª parte</th>
+     ${window.manualMatchDetails.extraTimeOccurred?'<th>Prórroga</th>':''}
+     ${window.manualMatchDetails.penaltiesOccurred?'<th>Penaltis</th>':''}
+     <th>Amar.</th>
+     <th>Doble amar.</th>
+     <th>Rojas</th>
+     <th>Goles favor</th>
+     <th>Goles contra</th>
+    </tr>
+   </thead>
+   <tbody>
+    ${window.manualMatchRoster.map((p,i)=>`
+     <tr>
+      <td>#${esc(String(p.number))} ${esc(p.name)}</td>
+      <td><input type="number" class="manual-stat-goals" data-index="${i}" min="0" value="0" style="width:55px"></td>
+      <td><input type="number" class="manual-stat-assists" data-index="${i}" min="0" value="0" style="width:55px"></td>
+      <td>—</td>
+      <td><input type="text" class="manual-stat-p1" data-index="${i}" value="00:00" style="width:65px"></td>
+      <td><input type="text" class="manual-stat-p2" data-index="${i}" value="00:00" style="width:65px"></td>
+      ${window.manualMatchDetails.extraTimeOccurred?'<td><input type="text" class="manual-stat-extra" data-index="'+i+'" value="00:00" style="width:65px"></td>':''}
+      ${window.manualMatchDetails.penaltiesOccurred?'<td><input type="text" class="manual-stat-penalties" data-index="'+i+'" placeholder="MFM" style="width:65px"></td>':''}
+      <td><input type="number" class="manual-stat-yellows" data-index="${i}" min="0" value="0" style="width:50px"></td>
+      <td><input type="number" class="manual-stat-double-yellows" data-index="${i}" min="0" value="0" style="width:50px"></td>
+      <td><input type="number" class="manual-stat-reds" data-index="${i}" min="0" value="0" style="width:50px"></td>
+      <td><input type="number" class="manual-stat-goals-for" data-index="${i}" min="0" value="0" style="width:55px"></td>
+      <td><input type="number" class="manual-stat-goals-against" data-index="${i}" min="0" value="0" style="width:55px"></td>
+     </tr>
+    `).join('')}
+   </tbody>
+  </table>
+ </div>
+`;
+  
 
  document.getElementById('manual-match-details-step').style.display='none';
  document.getElementById('manual-match-stats-step').style.display='block';
