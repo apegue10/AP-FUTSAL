@@ -578,6 +578,20 @@ function updateSavedMatchMetadata(field,value){
  }
 
  savedMatchEditDraft[field]=value;
+   if(field==='extraTimeOccurred'||field==='penaltiesOccurred'){
+  savedMatchEditDraft[field]=!!value;
+
+  document.getElementById('saved-match-extra-header').style.display=
+   savedMatchEditDraft.extraTimeOccurred?'':'none';
+
+  document.getElementById('saved-match-penalties-header').style.display=
+   savedMatchEditDraft.penaltiesOccurred?'':'none';
+
+  document.getElementById('saved-match-players').innerHTML=
+   renderSavedMatchPlayerRows(savedMatchEditDraft);
+
+  return;
+   }
 }
 function renderSavedMatchRosterEditor(){
  if(!savedMatchEditDraft)return;
