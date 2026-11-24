@@ -484,8 +484,13 @@ return `<div class="event"><strong>${esc(e.type||'Evento')}</strong> · ${esc(wh
  document.getElementById('saved-match-detail').style.display='block';
 }
 function toggleSavedMatchEdit(){
- if(!savedMatchEditDraft)return;
- savedMatchEditing=true;
+  const selectedMatch=S.matchHistory.find(
+    m=>String(m.id)===String(savedMatchEditId)
+  );
+  if(!selectedMatch)return;
+
+  savedMatchEditDraft=JSON.parse(JSON.stringify(selectedMatch));
+  savedMatchEditing=true;
    const metadata=document.getElementById('saved-match-metadata-edit');
  metadata.style.display='block';
  metadata.innerHTML=`
