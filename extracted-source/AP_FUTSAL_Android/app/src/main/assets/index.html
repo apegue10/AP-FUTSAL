@@ -529,6 +529,14 @@ function toggleSavedMatchEdit(){
    onchange="updateSavedMatchMetadata('foulsRiv',this.value)">
  </div>
 `;
+metadata.innerHTML+=`
+ <div class="field">
+  <h3>Convocatoria del partido</h3>
+  <p>Selecciona los jugadores que estuvieron convocados.</p>
+  <div id="saved-match-roster-editor"></div>
+ </div>
+`;
+renderSavedMatchRosterEditor();
  document.getElementById('saved-match-players').innerHTML=
   renderSavedMatchPlayerRows(savedMatchEditDraft);
  document.getElementById('saved-match-edit-button').style.display='none';
