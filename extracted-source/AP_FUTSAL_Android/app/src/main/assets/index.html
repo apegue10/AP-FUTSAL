@@ -707,7 +707,41 @@ function updateSavedMatchPlayerField(input){
  );
 
  if(!player)return;
+if(field==='penaltyAttempts'){
+ const text=input.value.trim().toUpperCase();
 
+ if(!/^[MF]*$/.test(text)){
+  alert('Usa únicamente M (marcado) o F (fallado).');
+  input.value=(player.penaltyAttempts||[]).map(a=>a==='scored'?'M':'F').join('');
+  return;
+ }
+
+ const attempts=[...text].map(a=>a==='M'?'scored':'missed');
+ player.penaltyAttempts=attempts;
+
+ const events=savedMatchEditDraft.events||[];
+ const previous=events.filter(e=>
+  e.type==='Penalti'&&String(e.playerId)===String(id)
+ );
+ const otherEvents=events.filter(e=>
+  !(e.type==='Penalti'&&String(e.playerId)===String(id))
+ );
+
+ const updatedEvents=attempts.map((result,i)=>previous[i]
+  ? {...previous[i],result}
+  : {
+     id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+i,
+     type:'Penalti',
+     playerId:Number(id),
+     result,
+     period:null,
+     time:'Sin registrar'
+    }
+ );
+
+ savedMatchEditDraft.events=[...updatedEvents,...otherEvents];
+ return;
+}
  let value;
 
  if(field==='secondsP1'||field==='secondsP2'||field==='secondsExtra'){
