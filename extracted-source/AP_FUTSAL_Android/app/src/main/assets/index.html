@@ -617,7 +617,7 @@ if(editedMatch.manualFormVersion===2){
   (sum,p)=>sum+(p.assists||0),0
  );
 
- if(totalGoals>editedMatch.scoreNos||totalAssists>editedMatch.scoreNos){
+ if(totalGoals>savedMatchEditDraft.scoreNos||totalAssists>savedMatchEditDraft.scoreNos){
   alert('Los goles y las asistencias individuales no pueden superar los goles del marcador.');
   return;
  }
@@ -674,7 +674,7 @@ if(editedMatch.manualFormVersion===2){
  let currentNos=0;
  let currentRiv=0;
 
- for(let i=0;i<editedMatch.scoreNos;i++){
+ for(let i=0;i<savedMatchEditDraft.scoreNos;i++){
   currentNos++;
 
   rebuiltEvents.push({
@@ -690,7 +690,7 @@ if(editedMatch.manualFormVersion===2){
   });
  }
 
- for(let i=0;i<editedMatch.scoreRiv;i++){
+ for(let i=0;i<savedMatchEditDraft.scoreRiv;i++){
   currentRiv++;
 
   rebuiltEvents.push({
