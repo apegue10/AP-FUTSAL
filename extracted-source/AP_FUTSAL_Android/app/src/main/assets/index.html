@@ -688,8 +688,8 @@ function updateSavedMatchPlayerField(input){
  const id=input.dataset.playerId;
  const field=input.dataset.field;
 
- const players=getSavedMatchPlayers(savedMatchEditDraft);
- savedMatchEditDraft.players=players;
+  const players=savedMatchEditDraft.players||
+  (savedMatchEditDraft.players=getSavedMatchPlayers(savedMatchEditDraft));
 
  const player=players.find(
   p=>String(p.playerId)===String(id)
