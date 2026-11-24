@@ -468,6 +468,12 @@ return `<div class="event"><strong>${esc(e.type||'Evento')}</strong> · ${esc(wh
 function toggleSavedMatchEdit(){
  if(!savedMatchEditDraft)return;
  savedMatchEditing=true;
+   const metadata=document.getElementById('saved-match-metadata-edit');
+ metadata.style.display='block';
+ metadata.innerHTML=`
+  <h3>Datos generales del partido</h3>
+  <p>Estamos preparando los campos de edición.</p>
+ `;
  document.getElementById('saved-match-players').innerHTML=
   renderSavedMatchPlayerRows(savedMatchEditDraft);
  document.getElementById('saved-match-edit-button').style.display='none';
