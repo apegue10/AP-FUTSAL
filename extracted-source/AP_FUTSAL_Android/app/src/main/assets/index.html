@@ -284,8 +284,8 @@ filteredAll.forEach(m=>{
   ?m.roster
   :dataPlayers.filter(hasData);
 
- const getKey=p=>String(p.playerId??(p.number+'-'+p.name));
-
+ const getKey=p=>String(p.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es-ES').trim().replace(/\s+/g,' ')||String(p.playerId);
+  
  calledPlayers.forEach(p=>{
   const k=getKey(p);
   if(!agg.has(k))agg.set(k,{
