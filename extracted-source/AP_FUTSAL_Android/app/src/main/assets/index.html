@@ -563,6 +563,95 @@ function updateSavedMatchMetadata(field,value){
 
  savedMatchEditDraft[field]=value;
 }
+function renderSavedMatchRosterEditor(){
+ if(!savedMatchEditDraft)return;
+
+ if(!Array.isArray(savedMatchEditDraft.roster)){
+  savedMatchEditDraft.roster=getSavedMatchPlayers(savedMatchEditDraft).map(p=>({
+   playerId:p.playerId,
+   number:p.number,
+   name:p.name
+  }));
+ }
+
+ const roster=savedMatchEditDraft.roster;
+
+ document.getElementById('saved-match-roster-editor').innerHTML=
+  S.players.map(p=>{
+   const checked=roster.some(r=>String(r.playerId)===String(p.id));
+
+   return `
+    <label class="player" style="display:flex;align-items:center;gap:10px;padding:7px">
+     <input type="checkbox" ${checked?'checked':''}
+      onchange="updateSavedMatchRoster(${p.id},this.checked)">
+     <span>#${esc(String(p.number))} ${esc(p.name)}</span>
+    </label>
+   `;
+  }).join('');
+}
+
+function updateSavedMatchRoster(playerId,checked){
+ if(!savedMatchEditDraft)return;
+
+ if(!Array.isArray(savedMatchEditDraft.roster)){
+  savedMatchEditDraft.roster=getSavedMatchPlayers(savedMatchEditDraft).map(p=>({
+   playerId:p.playerId,
+   number:p.number,
+   name:p.name
+  }));
+ }
+
+ const roster=savedMatchEditDraft.roster;
+ const player=S.players.find(p=>String(p.id)===String(playerId));
+
+ if(!player)return;
+
+ const index=roster.findIndex(r=>String(r.playerId)===String(playerId));
+
+ if(checked){
+  if(index>=0)return;
+
+  if(roster.length>=14){
+   alert('La convocatoria admite un máximo de 14 jugadores.');
+   renderSavedMatchRosterEditor();
+   return;
+  }
+
+  roster.push({
+   playerId:player.id,
+   number:player.number,
+   name:player.name
+  });
+
+  if(!(savedMatchEditDraft.players||[]).some(p=>String(p.playerId)===String(player.id))){
+   savedMatchEditDraft.players.push({
+    playerId:player.id,
+    number:player.number,
+    name:player.name,
+    goals:0,
+    assists:0,
+    secondsP1:0,
+    secondsP2:0,
+    secondsP3:0,
+    secondsP4:0,
+    secondsExtra:0,
+    goalsFor:0,
+    goalsAgainst:0,
+    yellows:0,
+    doubleYellows:0,
+    reds:0,
+    penaltyAttempts:[]
+   });
+  }
+ }else{
+  if(index>=0)roster.splice(index,1);
+ }
+
+ document.getElementById('saved-match-players').innerHTML=
+  renderSavedMatchPlayerRows(savedMatchEditDraft);
+
+ renderSavedMatchRosterEditor();
+}
 function updateSavedMatchPlayerField(input){
  if(!savedMatchEditDraft)return;
 
