@@ -535,6 +535,26 @@ function toggleSavedMatchEdit(){
  document.getElementById('saved-match-save-button').style.display='';
  document.getElementById('saved-match-cancel-button').style.display='';
 }
+function updateSavedMatchMetadata(field,value){
+ if(!savedMatchEditDraft)return;
+
+ if(field==='date'){
+  if(!value)return;
+  savedMatchEditDraft.date=new Date(value+'T12:00:00').toISOString();
+  savedMatchEditDraft.dateLabel=new Date(value+'T12:00:00').toLocaleDateString('es-ES');
+  return;
+ }
+
+ if(['scoreNos','scoreRiv','foulsNos','foulsRiv'].includes(field)){
+  value=Math.max(0,Math.floor(Number(value)||0));
+ }
+
+ if(['teamName','rivalName','venue','competition'].includes(field)){
+  value=String(value||'').trim();
+ }
+
+ savedMatchEditDraft[field]=value;
+}
 function updateSavedMatchPlayerField(input){
  if(!savedMatchEditDraft)return;
 
