@@ -523,12 +523,28 @@ function toggleSavedMatchEdit(){
    onchange="updateSavedMatchMetadata('foulsNos',this.value)">
  </div>
 
- <div class="field">
-  <label>Faltas del rival</label>
-  <input type="number" min="0" value="${savedMatchEditDraft.foulsRiv||0}"
-   onchange="updateSavedMatchMetadata('foulsRiv',this.value)">
- </div>
-`;
+   <div class="field">
+   <label>Faltas del rival</label>
+   <input type="number" min="0" value="${savedMatchEditDraft.foulsRiv||0}"
+    onchange="updateSavedMatchMetadata('foulsRiv',this.value)">
+  </div>
+
+  <div class="field">
+   <label>
+    <input type="checkbox" ${savedMatchEditDraft.extraTimeOccurred?'checked':''}
+     onchange="updateSavedMatchMetadata('extraTimeOccurred',this.checked)">
+    ¿Hubo prórroga?
+   </label>
+  </div>
+
+  <div class="field">
+   <label>
+    <input type="checkbox" ${savedMatchEditDraft.penaltiesOccurred?'checked':''}
+     onchange="updateSavedMatchMetadata('penaltiesOccurred',this.checked)">
+    ¿Hubo tanda de penaltis?
+   </label>
+  </div>
+ `;
 metadata.innerHTML+=`
  <div class="field">
   <h3>Convocatoria del partido</h3>
