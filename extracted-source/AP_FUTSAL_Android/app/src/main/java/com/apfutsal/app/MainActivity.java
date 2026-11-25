@@ -54,6 +54,7 @@ private String pendingBackupJson;
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
         webView.addJavascriptInterface(new PrintBridge(), "AndroidPrint");
+        webView.addJavascriptInterface(new BackupBridge(), "AndroidBackup");
         root.addView(webView, new FrameLayout.LayoutParams(-1, -1));
         setContentView(root);
         webView.loadUrl("file:///android_asset/index.html");
