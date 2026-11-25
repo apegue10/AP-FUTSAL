@@ -601,7 +601,16 @@ cloudRefreshStatus();
           window.addEventListener('online', () => {
             cloudSyncPending();
           });
+// Activar automáticamente el equipo guardado al abrir la aplicación.
+const savedTeam = cloudTeam();
 
+if (savedTeam) {
+  try {
+    cloudActivateTeam(savedTeam);
+  } catch (e) {
+    console.error('No se pudo activar el almacenamiento del equipo:', e);
+  }
+}
           window.addEventListener('load', cloudRefreshStatus);
           """
               tail = '</script></body></html>'
