@@ -29,19 +29,15 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Extraer proyecto
-        run: |
-          unzip AP_FUTSAL_Android_COMPETICIONES_PERSONALIZADAS.zip
-          echo "PROJECT_DIR=AP_FUTSAL_Android" >> "$GITHUB_ENV"
-
       - name: Compilar APK
         run: |
-          cd "$PROJECT_DIR"
+          cd extracted-source/AP_FUTSAL_Android
           gradle assembleDebug
 
       - name: Guardar APK
         uses: actions/upload-artifact@v4
         with:
           name: AP-FUTSAL-APK
-          path: AP_FUTSAL_Android/app/build/outputs/apk/debug/app-debug.apk
+          path: extracted-source/AP_FUTSAL_Android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          
