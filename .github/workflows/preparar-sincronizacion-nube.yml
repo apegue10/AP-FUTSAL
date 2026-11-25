@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-            - name: Descargar rama de trabajo
+      - name: Descargar rama de trabajo
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
