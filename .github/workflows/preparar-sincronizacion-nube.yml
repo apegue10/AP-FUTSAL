@@ -416,8 +416,15 @@ function cloudPendingKey() {
     encodeURIComponent(String(team.id));
 }
           function cloudPendingMatches() {
-            try {
-              const value = JSON.parse(localStorage.getItem(AP_CLOUD_PENDING) || '[]');
+  try {
+    const value = JSON.parse(
+      localStorage.getItem(cloudPendingKey()) || '[]'
+    );
+    return Array.isArray(value) ? value : [];
+  } catch (e) {
+    return [];
+  }
+}
               return Array.isArray(value) ? value : [];
             } catch (e) {
               return [];
