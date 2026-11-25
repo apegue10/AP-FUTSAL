@@ -425,11 +425,6 @@ function cloudPendingKey() {
     return [];
   }
 }
-              return Array.isArray(value) ? value : [];
-            } catch (e) {
-              return [];
-            }
-          }
 
           async function apCloudUploadState(manual) {
             const session = cloudRequireSession();
