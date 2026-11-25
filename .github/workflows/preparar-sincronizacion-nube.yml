@@ -488,7 +488,7 @@ function cloudPendingKey() {
             if (pending.length) {
               const currentPending = cloudPendingMatches();
               const remaining = currentPending.filter(id => !pending.includes(id));
-              localStorage.setItem(AP_CLOUD_PENDING, JSON.stringify(remaining));
+              localStorage.setItem(cloudPendingKey(), JSON.stringify(remaining));
             }
 
             cloudStatus(
