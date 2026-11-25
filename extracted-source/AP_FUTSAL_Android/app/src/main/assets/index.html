@@ -1790,8 +1790,69 @@ function exportPDF(sectionId='view-estadisticas'){
 }
 
 function exportBackup(){syncClock();save();download(JSON.stringify(S,null,2),'copia-futsal-'+new Date().toISOString().slice(0,10)+'.json','application/json')}
-function importBackup(e){const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d.players)||!Array.isArray(d.slots))throw Error('Formato incorrecto');if(!confirm('Restaurar esta copia sustituirá los datos actuales. ¿Continuar?'))return;S={...S,...d,running:false,startedAt:null,endAt:null,lastElapsedSynced:0};S.matchHistory=Array.isArray(S.matchHistory)?S.matchHistory:[];S.competitions=Array.isArray(S.competitions)?S.competitions:[];[S.competition,...S.matchHistory.map(m=>m.competition)].filter(v=>typeof v==='string'&&v.trim()).forEach(c=>{if(!S.competitions.some(x=>x.toLocaleLowerCase('es-ES')===c.trim().toLocaleLowerCase('es-ES')))S.competitions.push(c.trim())});save();renderAll();alert('Copia restaurada.')}catch(err){alert('No se pudo restaurar: '+err.message)}e.target.value=''};rd.readAsText(f)}
-function download(data,name,type){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([data],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+
+function exportBackup(){
+ syncClock();
+ save();
+ const template=JSON.parse(localStorage.getItem(TEMPLATE_KEY)||'null')||{
+  players:S.players.map(p=>({id:p.id,number:p.number,name:p.name,called:!!p.called}))
+ };
+ const backup={
+  format:'AP_FUTSAL_BACKUP',
+  version:1,
+  exportedAt:new Date().toISOString(),
+  state:S,
+  template:template
+ };
+ const filename='copia-AP-FUTSAL-'+new Date().toISOString().slice(0,10)+'.json';
+ const json=JSON.stringify(backup,null,2);
+ if(window.AndroidBackup&&typeof window.AndroidBackup.saveBackup==='function'){
+  window.AndroidBackup.saveBackup(json,filename);
+  return;
+ }
+ download(json,filename,'application/json');
+}
+
+function importBackup(e){
+ const f=e.target.files[0];
+ if(!f)return;
+ const rd=new FileReader();
+ rd.onload=()=>{
+  try{
+   const backup=JSON.parse(rd.result);
+   const wrapped=backup&&backup.format==='AP_FUTSAL_BACKUP'&&backup.state;
+   const d=wrapped?backup.state:backup;
+   if(!Array.isArray(d.players)||!Array.isArray(d.slots))throw Error('Formato incorrecto');
+   if(!confirm('Restaurar esta copia sustituirá los datos actuales. ¿Continuar?'))return;
+   if(wrapped&&backup.template&&Array.isArray(backup.template.players)){
+    localStorage.setItem(TEMPLATE_KEY,JSON.stringify(backup.template));
+   }
+   S={...S,...d,running:false,startedAt:null,endAt:null,lastElapsedSynced:0};
+   S.matchHistory=Array.isArray(S.matchHistory)?S.matchHistory:[];
+   S.competitions=Array.isArray(S.competitions)?S.competitions:[];
+   [S.competition,...S.matchHistory.map(m=>m.competition)].filter(v=>typeof v==='string'&&v.trim()).forEach(c=>{
+    if(!S.competitions.some(x=>x.toLocaleLowerCase('es-ES')===c.trim().toLocaleLowerCase('es-ES')))S.competitions.push(c.trim());
+   });
+   save();
+   renderAll();
+   alert('Copia restaurada.');
+  }catch(err){
+   alert('No se pudo restaurar: '+err.message);
+  }
+  e.target.value='';
+ };
+ rd.readAsText(f);
+}
+
+function download(data,name,type){
+ const a=document.createElement('a');
+ const u=URL.createObjectURL(new Blob([data],{type}));
+ a.href=u;
+ a.download=name;
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(u),1000);
+}
+  
 function saveCurrentMatch(){syncClock();if(!matchHasActivity()){alert('Este partido está vacío. Registra algún dato antes de guardarlo.');return;}const m=snapshotMatch('Partido',true);m.id='m-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);m.status='archived';S.matchHistory.push(m);S.running=false;S.startedAt=null;S.endAt=null;S.scoreNos=0;S.scoreRiv=0;S.foulsNos=0;S.foulsRiv=0;S.period=1;S.remaining=S.halfLength*60;S.startRemaining=S.remaining;S.lastElapsedSynced=0;S.slots=[null,null,null,null,null];S.events=[];S.players.forEach(p=>{p.secondsP1=0;p.secondsP2=0;p.goals=0;p.assists=0;p.goalsFor=0;p.goalsAgainst=0;p.yellows=0;p.doubleYellows=0;p.reds=0;p.ejected=false;p.plusMinus=0});save();renderAll();switchView('partido');alert('Partido guardado en el historial con sus estadísticas y eventos. El partido actual se ha dejado en blanco para el siguiente.');}
 function deleteCurrentMatch(){if(!confirm('¿Eliminar TODOS los datos del partido actual (marcador, tiempos, goles, tarjetas y eventos)? Los partidos ya guardados en el historial y la plantilla base se conservarán.'))return;S.running=false;S.startedAt=null;S.endAt=null;S.scoreNos=0;S.scoreRiv=0;S.foulsNos=0;S.foulsRiv=0;S.period=1;S.remaining=S.halfLength*60;S.startRemaining=S.remaining;S.lastElapsedSynced=0;S.slots=[null,null,null,null,null];S.events=[];S.players.forEach(p=>{p.secondsP1=0;p.secondsP2=0;p.goals=0;p.assists=0;p.goalsFor=0;p.goalsAgainst=0;p.yellows=0;p.doubleYellows=0;p.reds=0;p.ejected=false;p.plusMinus=0});save();renderAll();switchView('partido');alert('Partido actual eliminado. La plantilla guardada y el historial no se han borrado.');}
 function deleteSavedMatch(id){
