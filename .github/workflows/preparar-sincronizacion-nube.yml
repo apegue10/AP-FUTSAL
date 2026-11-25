@@ -364,7 +364,8 @@ function cloudActivateTeam(team) {
                 encodeURIComponent(id) + '&select=id,name,invite_code');
               if (!rows?.length) throw Error('No se pudo leer el codigo de invitacion.');
               localStorage.setItem(AP_CLOUD_TEAM, JSON.stringify(rows[0]));
-              cloudRefreshStatus();
+cloudActivateTeam(rows[0]);
+cloudRefreshStatus();
               cloudStatus('cloud-team-status', 'Equipo: ' + rows[0].name +
                 ' · Codigo: ' + rows[0].invite_code);
             } catch (e) {
@@ -386,7 +387,8 @@ function cloudActivateTeam(team) {
                 encodeURIComponent(id) + '&select=id,name,invite_code');
               if (!rows?.length) throw Error('No se pudo cargar el equipo.');
               localStorage.setItem(AP_CLOUD_TEAM, JSON.stringify(rows[0]));
-              cloudRefreshStatus();
+cloudActivateTeam(rows[0]);
+cloudRefreshStatus();
               cloudStatus('cloud-team-status', 'Unida al equipo: ' + rows[0].name +
                 ' · Codigo: ' + rows[0].invite_code);
             } catch (e) {
