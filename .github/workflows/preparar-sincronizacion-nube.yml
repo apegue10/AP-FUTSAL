@@ -1,4 +1,3 @@
-
 name: Preparar sincronizacion nube AP FUTSAL
 
 on:
@@ -89,101 +88,100 @@ jobs:
           const AP_CLOUD_KEY = '__SUPABASE_PUBLISHABLE_KEY__';
           const AP_CLOUD_SESSION = 'ap-futsal-cloud-session-v1';
           const AP_CLOUD_TEAM = 'ap-futsal-cloud-team-v1';
-
-          function cloudSession() {
+                    function cloudSession() {
             try { return JSON.parse(localStorage.getItem(AP_CLOUD_SESSION) || 'null'); }
             catch (_) { return null; }
           }
           function cloudTeam() {
-  try {
-    return JSON.parse(localStorage.getItem(AP_CLOUD_TEAM) || 'null');
-  } catch (_) {
-    return null;
-  }
-}
+          try {
+          return JSON.parse(localStorage.getItem(AP_CLOUD_TEAM) || 'null');
+          } catch (_) {
+          return null;
+          }
+          }
 
-// Identifica el equipo cuyos datos están activos en este dispositivo.
-let AP_CLOUD_ACTIVE_TEAM_ID = null;
+          // Identifica el equipo cuyos datos están activos en este dispositivo.
+          let AP_CLOUD_ACTIVE_TEAM_ID = null;
 
-// Marca qué equipo recibió por primera vez los datos antiguos.
-const AP_CLOUD_MIGRATION_KEY = 'ap-futsal-storage-owner-v1';
+          // Marca qué equipo recibió por primera vez los datos antiguos.
+          const AP_CLOUD_MIGRATION_KEY = 'ap-futsal-storage-owner-v1';
 
-function cloudActivateTeam(team) {
-  if (!team || !team.id) return false;
+          function cloudActivateTeam(team) {
+          if (!team || !team.id) return false;
 
-  const teamId = String(team.id);
+          const teamId = String(team.id);
 
-  if (AP_CLOUD_ACTIVE_TEAM_ID === teamId) return false;
+          if (AP_CLOUD_ACTIVE_TEAM_ID === teamId) return false;
 
-  // Guardar el equipo anterior antes de cambiar de almacenamiento.
-  if (AP_CLOUD_ACTIVE_TEAM_ID !== null) {
-    save();
-  }
+          // Guardar el equipo anterior antes de cambiar de almacenamiento.
+          if (AP_CLOUD_ACTIVE_TEAM_ID !== null) {
+          save();
+          }
 
-  const newStorageKey =
-    'futsal-bench-manager-v4:team:' + encodeURIComponent(teamId);
+          const newStorageKey =
+          'futsal-bench-manager-v4:team:' + encodeURIComponent(teamId);
 
-  const newTemplateKey =
-    'ap-futsal-template-v1:team:' + encodeURIComponent(teamId);
+          const newTemplateKey =
+          'ap-futsal-template-v1:team:' + encodeURIComponent(teamId);
 
-  // Si es el primer equipo, conservar todos los datos antiguos.
-  const migrationOwner = localStorage.getItem(AP_CLOUD_MIGRATION_KEY);
+          // Si es el primer equipo, conservar todos los datos antiguos.
+          const migrationOwner = localStorage.getItem(AP_CLOUD_MIGRATION_KEY);
 
-  if (!migrationOwner) {
-    const oldState = localStorage.getItem('futsal-bench-manager-v4');
-    const oldTemplate = localStorage.getItem('ap-futsal-template-v1');
+          if (!migrationOwner) {
+          const oldState = localStorage.getItem('futsal-bench-manager-v4');
+          const oldTemplate = localStorage.getItem('ap-futsal-template-v1');
 
-    if (!localStorage.getItem(newStorageKey) && oldState) {
-      localStorage.setItem(newStorageKey, oldState);
-    }
+          if (!localStorage.getItem(newStorageKey) && oldState) {
+          localStorage.setItem(newStorageKey, oldState);
+          }
 
-    if (!localStorage.getItem(newTemplateKey) && oldTemplate) {
-      localStorage.setItem(newTemplateKey, oldTemplate);
-    }
+          if (!localStorage.getItem(newTemplateKey) && oldTemplate) {
+          localStorage.setItem(newTemplateKey, oldTemplate);
+          }
 
-    localStorage.setItem(AP_CLOUD_MIGRATION_KEY, teamId);
-  }
+          localStorage.setItem(AP_CLOUD_MIGRATION_KEY, teamId);
+          }
 
-  // Activar las claves exclusivas del equipo.
-  STORAGE_KEY = newStorageKey;
-  TEMPLATE_KEY = newTemplateKey;
-  AP_CLOUD_ACTIVE_TEAM_ID = teamId;
+          // Activar las claves exclusivas del equipo.
+          STORAGE_KEY = newStorageKey;
+          TEMPLATE_KEY = newTemplateKey;
+          AP_CLOUD_ACTIVE_TEAM_ID = teamId;
 
-  // Preparar un estado vacío antes de cargar los datos del nuevo equipo.
-  S = {
-    players: JSON.parse(JSON.stringify(defaultPlayers)),
-    slots: [null, null, null, null, null],
-    period: 1,
-    extraTimeOccurred: false,
-    remaining: 1200,
-    halfLength: 20,
-    running: false,
-    startedAt: null,
-    endAt: null,
-    startRemaining: 1200,
-    lastElapsedSynced: 0,
-    scoreNos: 0,
-    scoreRiv: 0,
-    foulsNos: 0,
-    foulsRiv: 0,
-    events: [],
-    matchHistory: [],
-    competitions: [],
-    selectedSlot: null,
-    selectedPlayerId: null,
-    benchAll: false,
-    teamName: 'Nosotros',
-    rivalName: 'Rival',
-    competition: '',
-    venue: 'Local'
-  };
+          // Preparar un estado vacío antes de cargar los datos del nuevo equipo.
+          S = {
+          players: JSON.parse(JSON.stringify(defaultPlayers)),
+          slots: [null, null, null, null, null],
+          period: 1,
+          extraTimeOccurred: false,
+          remaining: 1200,
+          halfLength: 20,
+          running: false,
+          startedAt: null,
+          endAt: null,
+          startRemaining: 1200,
+          lastElapsedSynced: 0,
+          scoreNos: 0,
+          scoreRiv: 0,
+          foulsNos: 0,
+          foulsRiv: 0,
+          events: [],
+          matchHistory: [],
+          competitions: [],
+          selectedSlot: null,
+          selectedPlayerId: null,
+          benchAll: false,
+          teamName: 'Nosotros',
+          rivalName: 'Rival',
+          competition: '',
+          venue: 'Local'
+          };
 
-  // Recuperar los datos propios del equipo, si ya existen.
-  load();
-  renderAll();
+          // Recuperar los datos propios del equipo, si ya existen.
+          load();
+          renderAll();
 
-  return true;
-}
+          return true;
+          }
           function cloudStatus(id, message) {
             const el = document.getElementById(id);
             if (el) el.textContent = message;
@@ -298,7 +296,7 @@ function cloudActivateTeam(team) {
             }
 
             return sendRequest(true);
-          }
+                      }
           function cloudRequireSession() {
             const session = cloudSession();
             if (!session || !session.access_token)
@@ -364,8 +362,8 @@ function cloudActivateTeam(team) {
                 encodeURIComponent(id) + '&select=id,name,invite_code');
               if (!rows?.length) throw Error('No se pudo leer el codigo de invitacion.');
               localStorage.setItem(AP_CLOUD_TEAM, JSON.stringify(rows[0]));
-cloudActivateTeam(rows[0]);
-cloudRefreshStatus();
+          cloudActivateTeam(rows[0]);
+          cloudRefreshStatus();
               cloudStatus('cloud-team-status', 'Equipo: ' + rows[0].name +
                 ' · Codigo: ' + rows[0].invite_code);
             } catch (e) {
@@ -387,8 +385,8 @@ cloudRefreshStatus();
                 encodeURIComponent(id) + '&select=id,name,invite_code');
               if (!rows?.length) throw Error('No se pudo cargar el equipo.');
               localStorage.setItem(AP_CLOUD_TEAM, JSON.stringify(rows[0]));
-cloudActivateTeam(rows[0]);
-cloudRefreshStatus();
+          cloudActivateTeam(rows[0]);
+          cloudRefreshStatus();
               cloudStatus('cloud-team-status', 'Unida al equipo: ' + rows[0].name +
                 ' · Codigo: ' + rows[0].invite_code);
             } catch (e) {
@@ -405,26 +403,26 @@ cloudRefreshStatus();
                 ' · Codigo: ' + team.invite_code);
           }
                     const AP_CLOUD_PENDING = 'AP_FUTSAL_CLOUD_PENDING';
-function cloudPendingKey() {
-  const team = cloudTeam();
+          function cloudPendingKey() {
+          const team = cloudTeam();
 
-  if (!team || !team.id) {
-    return 'AP_FUTSAL_CLOUD_PENDING';
-  }
+          if (!team || !team.id) {
+          return 'AP_FUTSAL_CLOUD_PENDING';
+          }
 
-  return 'AP_FUTSAL_CLOUD_PENDING:team:' +
-    encodeURIComponent(String(team.id));
-}
+          return 'AP_FUTSAL_CLOUD_PENDING:team:' +
+          encodeURIComponent(String(team.id));
+          }
           function cloudPendingMatches() {
-  try {
-    const value = JSON.parse(
-      localStorage.getItem(cloudPendingKey()) || '[]'
-    );
-    return Array.isArray(value) ? value : [];
-  } catch (e) {
-    return [];
-  }
-}
+          try {
+          const value = JSON.parse(
+          localStorage.getItem(cloudPendingKey()) || '[]'
+          );
+          return Array.isArray(value) ? value : [];
+          } catch (e) {
+          return [];
+          }
+          }
 
           async function apCloudUploadState(manual) {
             const session = cloudRequireSession();
@@ -508,7 +506,7 @@ function cloudPendingKey() {
               if (!cloudPendingMatches().length) return;
 
               await apCloudUploadState(false);
-            } catch (e) {
+                          } catch (e) {
               cloudStatus(
                 'cloud-team-status',
                 'Hay partidos pendientes de sincronizar: ' + e.message
@@ -588,9 +586,9 @@ function cloudPendingKey() {
                   if (!pending.includes(match.id)) {
                     pending.push(match.id);
                     localStorage.setItem(
-  cloudPendingKey(),
-  JSON.stringify(pending)
-);
+          cloudPendingKey(),
+          JSON.stringify(pending)
+          );
                   }
 
                   if (navigator.onLine) {
@@ -612,16 +610,16 @@ function cloudPendingKey() {
           window.addEventListener('online', () => {
             cloudSyncPending();
           });
-// Activar automáticamente el equipo guardado al abrir la aplicación.
-const savedTeam = cloudTeam();
+          // Activar automáticamente el equipo guardado al abrir la aplicación.
+          const savedTeam = cloudTeam();
 
-if (savedTeam) {
-  try {
-    cloudActivateTeam(savedTeam);
-  } catch (e) {
-    console.error('No se pudo activar el almacenamiento del equipo:', e);
-  }
-}
+          if (savedTeam) {
+          try {
+          cloudActivateTeam(savedTeam);
+          } catch (e) {
+          console.error('No se pudo activar el almacenamiento del equipo:', e);
+          }
+          }
           window.addEventListener('load', cloudRefreshStatus);
           """
               tail = '</script></body></html>'
@@ -659,4 +657,3 @@ if (savedTeam) {
           name: AP-FUTSAL-Cloud-Test
           path: extracted-source/AP_FUTSAL_Android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          
