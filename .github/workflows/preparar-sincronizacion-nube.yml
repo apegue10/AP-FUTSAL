@@ -405,7 +405,16 @@ cloudRefreshStatus();
                 ' · Codigo: ' + team.invite_code);
           }
                     const AP_CLOUD_PENDING = 'AP_FUTSAL_CLOUD_PENDING';
+function cloudPendingKey() {
+  const team = cloudTeam();
 
+  if (!team || !team.id) {
+    return 'AP_FUTSAL_CLOUD_PENDING';
+  }
+
+  return 'AP_FUTSAL_CLOUD_PENDING:team:' +
+    encodeURIComponent(String(team.id));
+}
           function cloudPendingMatches() {
             try {
               const value = JSON.parse(localStorage.getItem(AP_CLOUD_PENDING) || '[]');
