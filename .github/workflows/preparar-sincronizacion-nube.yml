@@ -15,7 +15,7 @@ jobs:
       - name: Descargar rama de trabajo
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+                ref: feature/offline-match-sync
 
       - name: Preparar Java
         uses: actions/setup-java@v4
@@ -95,9 +95,95 @@ jobs:
             catch (_) { return null; }
           }
           function cloudTeam() {
-            try { return JSON.parse(localStorage.getItem(AP_CLOUD_TEAM) || 'null'); }
-            catch (_) { return null; }
-          }
+  try {
+    return JSON.parse(localStorage.getItem(AP_CLOUD_TEAM) || 'null');
+  } catch (_) {
+    return null;
+  }
+}
+
+// Identifica el equipo cuyos datos están activos en este dispositivo.
+let AP_CLOUD_ACTIVE_TEAM_ID = null;
+
+// Marca qué equipo recibió por primera vez los datos antiguos.
+const AP_CLOUD_MIGRATION_KEY = 'ap-futsal-storage-owner-v1';
+
+function cloudActivateTeam(team) {
+  if (!team || !team.id) return false;
+
+  const teamId = String(team.id);
+
+  if (AP_CLOUD_ACTIVE_TEAM_ID === teamId) return false;
+
+  // Guardar el equipo anterior antes de cambiar de almacenamiento.
+  if (AP_CLOUD_ACTIVE_TEAM_ID !== null) {
+    save();
+  }
+
+  const newStorageKey =
+    'futsal-bench-manager-v4:team:' + encodeURIComponent(teamId);
+
+  const newTemplateKey =
+    'ap-futsal-template-v1:team:' + encodeURIComponent(teamId);
+
+  // Si es el primer equipo, conservar todos los datos antiguos.
+  const migrationOwner = localStorage.getItem(AP_CLOUD_MIGRATION_KEY);
+
+  if (!migrationOwner) {
+    const oldState = localStorage.getItem('futsal-bench-manager-v4');
+    const oldTemplate = localStorage.getItem('ap-futsal-template-v1');
+
+    if (!localStorage.getItem(newStorageKey) && oldState) {
+      localStorage.setItem(newStorageKey, oldState);
+    }
+
+    if (!localStorage.getItem(newTemplateKey) && oldTemplate) {
+      localStorage.setItem(newTemplateKey, oldTemplate);
+    }
+
+    localStorage.setItem(AP_CLOUD_MIGRATION_KEY, teamId);
+  }
+
+  // Activar las claves exclusivas del equipo.
+  STORAGE_KEY = newStorageKey;
+  TEMPLATE_KEY = newTemplateKey;
+  AP_CLOUD_ACTIVE_TEAM_ID = teamId;
+
+  // Preparar un estado vacío antes de cargar los datos del nuevo equipo.
+  S = {
+    players: JSON.parse(JSON.stringify(defaultPlayers)),
+    slots: [null, null, null, null, null],
+    period: 1,
+    extraTimeOccurred: false,
+    remaining: 1200,
+    halfLength: 20,
+    running: false,
+    startedAt: null,
+    endAt: null,
+    startRemaining: 1200,
+    lastElapsedSynced: 0,
+    scoreNos: 0,
+    scoreRiv: 0,
+    foulsNos: 0,
+    foulsRiv: 0,
+    events: [],
+    matchHistory: [],
+    competitions: [],
+    selectedSlot: null,
+    selectedPlayerId: null,
+    benchAll: false,
+    teamName: 'Nosotros',
+    rivalName: 'Rival',
+    competition: '',
+    venue: 'Local'
+  };
+
+  // Recuperar los datos propios del equipo, si ya existen.
+  load();
+  renderAll();
+
+  return true;
+}
           function cloudStatus(id, message) {
             const el = document.getElementById(id);
             if (el) el.textContent = message;
@@ -111,22 +197,107 @@ jobs:
               ? { Authorization: 'Bearer ' + session.access_token }
               : {}, extra);
           }
-          async function cloudRequest(path, options = {}) {
-            if (!AP_CLOUD_URL || AP_CLOUD_URL.startsWith('__'))
-              throw Error('Falta configurar Supabase.');
-            const response = await fetch(
-              AP_CLOUD_URL.replace(/\/$/, '') + path,
-              Object.assign({ headers: cloudHeaders() }, options)
-            );
-            const raw = await response.text();
-            let data;
-            try { data = raw ? JSON.parse(raw) : null; }
-            catch (_) { data = raw; }
-            if (!response.ok) {
-              throw Error(data && (data.message || data.msg || data.error_description)
-                || (typeof data === 'string' ? data : 'Error HTTP ' + response.status));
+                    let apCloudRefreshPromise = null;
+
+          async function cloudRefreshSession() {
+            const current = cloudSession();
+            if (!current || !current.refresh_token) {
+              throw Error('La sesión ha caducado. Inicia sesión de nuevo.');
             }
-            return data;
+
+            if (!apCloudRefreshPromise) {
+              apCloudRefreshPromise = (async () => {
+                const response = await fetch(
+                  AP_CLOUD_URL.replace(/\/$/, '') +
+                    '/auth/v1/token?grant_type=refresh_token',
+                  {
+                    method: 'POST',
+                    headers: {
+                      apikey: AP_CLOUD_KEY,
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      refresh_token: current.refresh_token
+                    })
+                  }
+                );
+
+                const raw = await response.text();
+                let data;
+                try { data = raw ? JSON.parse(raw) : null; }
+                catch (_) { data = raw; }
+
+                if (!response.ok || !data || !data.access_token) {
+                  throw Error(
+                    'No se pudo renovar la sesión. Inicia sesión de nuevo.'
+                  );
+                }
+
+                localStorage.setItem(
+                  AP_CLOUD_SESSION,
+                  JSON.stringify(data)
+                );
+                return data;
+              })().finally(() => {
+                apCloudRefreshPromise = null;
+              });
+            }
+
+            return apCloudRefreshPromise;
+          }
+
+          async function cloudRequest(path, options = {}) {
+            if (!AP_CLOUD_URL || AP_CLOUD_URL.startsWith('__')) {
+              throw Error('Falta configurar Supabase.');
+            }
+
+            const url = AP_CLOUD_URL.replace(/\/$/, '') + path;
+
+            async function sendRequest(allowRetry) {
+              const headers = Object.assign(
+                {},
+                cloudHeaders(),
+                options.headers || {}
+              );
+
+              const session = cloudSession();
+              if (session && session.access_token) {
+                headers.Authorization = 'Bearer ' + session.access_token;
+              }
+
+              const response = await fetch(
+                url,
+                Object.assign({}, options, { headers })
+              );
+
+              if (
+                response.status === 401 &&
+                allowRetry &&
+                cloudSession() &&
+                cloudSession().refresh_token
+              ) {
+                await cloudRefreshSession();
+                return sendRequest(false);
+              }
+
+              const raw = await response.text();
+              let data;
+              try { data = raw ? JSON.parse(raw) : null; }
+              catch (_) { data = raw; }
+
+              if (!response.ok) {
+                throw Error(
+                  data && (data.message || data.msg || data.error_description)
+                  || (typeof data === 'string'
+                    ? data
+                    : 'Error HTTP ' + response.status)
+                );
+              }
+
+              return data;
+            }
+
+            return sendRequest(true);
           }
           function cloudRequireSession() {
             const session = cloudSession();
@@ -193,7 +364,8 @@ jobs:
                 encodeURIComponent(id) + '&select=id,name,invite_code');
               if (!rows?.length) throw Error('No se pudo leer el codigo de invitacion.');
               localStorage.setItem(AP_CLOUD_TEAM, JSON.stringify(rows[0]));
-              cloudRefreshStatus();
+cloudActivateTeam(rows[0]);
+cloudRefreshStatus();
               cloudStatus('cloud-team-status', 'Equipo: ' + rows[0].name +
                 ' · Codigo: ' + rows[0].invite_code);
             } catch (e) {
@@ -215,7 +387,8 @@ jobs:
                 encodeURIComponent(id) + '&select=id,name,invite_code');
               if (!rows?.length) throw Error('No se pudo cargar el equipo.');
               localStorage.setItem(AP_CLOUD_TEAM, JSON.stringify(rows[0]));
-              cloudRefreshStatus();
+cloudActivateTeam(rows[0]);
+cloudRefreshStatus();
               cloudStatus('cloud-team-status', 'Unida al equipo: ' + rows[0].name +
                 ' · Codigo: ' + rows[0].invite_code);
             } catch (e) {
@@ -231,90 +404,129 @@ jobs:
               cloudStatus('cloud-team-status', 'Equipo: ' + team.name +
                 ' · Codigo: ' + team.invite_code);
           }
+                    const AP_CLOUD_PENDING = 'AP_FUTSAL_CLOUD_PENDING';
+function cloudPendingKey() {
+  const team = cloudTeam();
+
+  if (!team || !team.id) {
+    return 'AP_FUTSAL_CLOUD_PENDING';
+  }
+
+  return 'AP_FUTSAL_CLOUD_PENDING:team:' +
+    encodeURIComponent(String(team.id));
+}
+          function cloudPendingMatches() {
+  try {
+    const value = JSON.parse(
+      localStorage.getItem(cloudPendingKey()) || '[]'
+    );
+    return Array.isArray(value) ? value : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+          async function apCloudUploadState(manual) {
+            const session = cloudRequireSession();
+            const team = cloudTeam();
+
+            if (!team?.id) throw Error('Crea un equipo o unete a uno primero.');
+
+            const pending = cloudPendingMatches();
+
+            if (!manual && !pending.length) return;
+
+            if (manual && !confirm(
+              'Se compartiran la plantilla y los datos actuales del equipo e historial. ¿Continuar?'
+            )) return;
+
+            // Comprobar quién es el dispositivo registrador.
+            const rows = await cloudRequest(
+              '/rest/v1/team_app_data?team_id=eq.' +
+              encodeURIComponent(team.id) +
+              '&select=updated_by'
+            );
+
+            if (rows?.length && rows[0].updated_by !== session.user.id) {
+              throw Error(
+                'Este equipo ya tiene otro dispositivo registrador. ' +
+                'Puedes descargar sus datos, pero no sobrescribirlos.'
+              );
+            }
+
+            // Guardar una copia estable del estado en el momento de la subida.
+            const stateSnapshot = JSON.parse(JSON.stringify(S));
+            const templateRaw = localStorage.getItem(TEMPLATE_KEY);
+
+            const payload = {
+              format: 1,
+              state: stateSnapshot,
+              template: templateRaw ? JSON.parse(templateRaw) : null
+            };
+
+            const body = {
+              team_id: team.id,
+              payload,
+              updated_by: session.user.id,
+              updated_at: new Date().toISOString()
+            };
+
+            await cloudRequest('/rest/v1/team_app_data?on_conflict=team_id', {
+              method: 'POST',
+              headers: cloudHeaders({
+                Prefer: 'resolution=merge-duplicates,return=minimal'
+              }),
+              body: JSON.stringify(body)
+            });
+
+            // Quitar solamente los partidos que estaban pendientes al iniciar la subida.
+            if (pending.length) {
+              const currentPending = cloudPendingMatches();
+              const remaining = currentPending.filter(id => !pending.includes(id));
+              localStorage.setItem(cloudPendingKey(), JSON.stringify(remaining));
+            }
+
+            cloudStatus(
+              'cloud-team-status',
+              pending.length
+                ? 'Partidos pendientes sincronizados correctamente.'
+                : 'Datos subidos al equipo correctamente.'
+            );
+          }
+
           async function cloudPush() {
             try {
-              const session = cloudRequireSession();
-              const team = cloudTeam();
-              if (!team?.id) throw Error('Crea un equipo o unete a uno primero.');
-              if (!confirm('Se compartiran la plantilla y los datos actuales del partido e historial con el equipo. ¿Continuar?')) return;
-              const templateRaw = localStorage.getItem(TEMPLATE_KEY);
-              const payload = {
-                format: 1,
-                state: S,
-                template: templateRaw ? JSON.parse(templateRaw) : null
-              };
-              const body = {
-                team_id: team.id,
-                payload,
-                updated_by: session.user.id,
-                updated_at: new Date().toISOString()
-              };
-              await cloudRequest('/rest/v1/team_app_data?on_conflict=team_id', {
-                method: 'POST',
-                headers: cloudHeaders({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
-                body: JSON.stringify(body)
-              });
-              cloudStatus('cloud-team-status', 'Datos subidos al equipo correctamente.');
+              await apCloudUploadState(true);
             } catch (e) {
               cloudStatus('cloud-team-status', 'Error al subir: ' + e.message);
             }
           }
+
+          async function cloudSyncPending() {
+            try {
+              if (!navigator.onLine) return;
+              if (!cloudPendingMatches().length) return;
+
+              await apCloudUploadState(false);
+            } catch (e) {
+              cloudStatus(
+                'cloud-team-status',
+                'Hay partidos pendientes de sincronizar: ' + e.message
+              );
+            }
+          }
+
           async function cloudPull() {
             try {
               cloudRequireSession();
+
               const team = cloudTeam();
               if (!team?.id) throw Error('Crea un equipo o unete a uno primero.');
-              if (!confirm('Descargar reemplazara los datos locales. Haz antes una copia JSON. ¿Continuar?')) return;
-              const rows = await cloudRequest('/rest/v1/team_app_data?team_id=eq.' +
-                encodeURIComponent(team.id) + '&select=payload,updated_at');
-              if (!rows?.length) throw Error('No hay datos compartidos todavia. Sube primero los datos desde el dispositivo que los tenga.');
-              const payload = rows[0].payload;
-              if (!payload?.state) throw Error('Los datos compartidos no tienen el formato esperado.');
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.state));
-              if (payload.template)
-                localStorage.setItem(TEMPLATE_KEY, JSON.stringify(payload.template));
-              load();
-              renderAll();
-              cloudStatus('cloud-team-status', 'Datos descargados correctamente.');
-            } catch (e) {
-              cloudStatus('cloud-team-status', 'Error al descargar: ' + e.message);
-            }
-          }
-          window.addEventListener('load', cloudRefreshStatus);
-          """
-              tail = '</script></body></html>'
-              if tail not in s:
-                  raise SystemExit("No se encontro el final del HTML.")
-              s = s.replace(tail, script + '\n' + tail, 1)
 
-          s = s.replace('__SUPABASE_URL__', os.environ['SUPABASE_URL'].rstrip('/'))
-          s = s.replace('__SUPABASE_PUBLISHABLE_KEY__', os.environ['SUPABASE_PUBLISHABLE_KEY'])
-          if '__SUPABASE_URL__' in s or '__SUPABASE_PUBLISHABLE_KEY__' in s:
-              raise SystemExit("No se pudo configurar Supabase.")
+              if (cloudPendingMatches().length) {
+                throw Error(
+                  'Tienes partidos pendientes de subir. Sincronizalos antes de descargar para no perderlos.'
+                );
+              }
 
-          html.write_text(s, encoding="utf-8")
-
-          manifest_text = manifest.read_text(encoding="utf-8")
-          permission = 'android.permission.INTERNET'
-          if permission not in manifest_text:
-              manifest_text = manifest_text.replace(
-                  '<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
-                  '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n    <uses-permission android:name="android.permission.INTERNET" />',
-                  1
-              )
-          manifest.write_text(manifest_text, encoding="utf-8")
-          print("Interfaz de nube y permiso de Internet preparados.")
-          PY
-
-      - name: Compilar APK de prueba
-        run: |
-          cd extracted-source/AP_FUTSAL_Android
-          gradle assembleDebug
-
-      - name: Guardar APK de prueba
-        uses: actions/upload-artifact@v4
-        with:
-          name: AP-FUTSAL-Cloud-Test
-          path: extracted-source/AP_FUTSAL_Android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          
+      
