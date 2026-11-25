@@ -157,6 +157,33 @@ private String pendingBackupJson;
     private int dp(int value) {
         return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
     }
+    @Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+
+    if (requestCode == BACKUP_CREATE_REQUEST) {
+        if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+
+            try (OutputStream outputStream = getContentResolver().openOutputStream(uri)) {
+                if (outputStream == null) {
+                    throw new java.io.IOException("No se pudo abrir el archivo");
+                }
+
+                outputStream.write(pendingBackupJson.getBytes(StandardCharsets.UTF_8));
+
+                Toast.makeText(this, "Copia de seguridad guardada correctamente", Toast.LENGTH_LONG).show();
+
+            } catch (Exception e) {
+                Toast.makeText(this, "Error al guardar la copia: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "Guardado cancelado", Toast.LENGTH_SHORT).show();
+        }
+
+        pendingBackupJson = null;
+    }
+}
 
     @Override
     public void onBackPressed() {
