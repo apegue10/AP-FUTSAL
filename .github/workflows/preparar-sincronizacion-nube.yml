@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar rama de trabajo
+            - name: Descargar rama de trabajo
         uses: actions/checkout@v4
         with:
-          ref: feature/cloud-sync-foundation
+          ref: ${{ github.ref_name }}
 
       - name: Preparar Java
         uses: actions/setup-java@v4
