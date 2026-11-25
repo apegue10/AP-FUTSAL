@@ -1789,8 +1789,6 @@ function exportPDF(sectionId='view-estadisticas'){
  }
 }
 
-function exportBackup(){syncClock();save();download(JSON.stringify(S,null,2),'copia-futsal-'+new Date().toISOString().slice(0,10)+'.json','application/json')}
-
 function exportBackup(){
  syncClock();
  save();
