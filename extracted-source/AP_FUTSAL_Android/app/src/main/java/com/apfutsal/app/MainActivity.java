@@ -30,6 +30,8 @@ public class MainActivity extends Activity {
     private FrameLayout root;
     private View printOverlay;
     private WebView reportWebView;
+    private static final int BACKUP_CREATE_REQUEST = 7101;
+private String pendingBackupJson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
