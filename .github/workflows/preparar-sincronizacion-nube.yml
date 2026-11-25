@@ -15,7 +15,7 @@ jobs:
       - name: Descargar rama de trabajo
         uses: actions/checkout@v4
         with:
-                ref: feature/offline-match-sync
+          ref: feature/offline-match-sync
 
       - name: Preparar Java
         uses: actions/setup-java@v4
@@ -529,4 +529,134 @@ function cloudPendingKey() {
                 );
               }
 
-      
+              if (!confirm(
+                'Descargar reemplazara los datos locales. Haz antes una copia JSON. ¿Continuar?'
+              )) return;
+
+              const rows = await cloudRequest(
+                '/rest/v1/team_app_data?team_id=eq.' +
+                encodeURIComponent(team.id) +
+                '&select=payload,updated_at'
+              );
+
+              if (!rows?.length) {
+                throw Error(
+                  'No hay datos compartidos todavia. Sube primero los datos desde el dispositivo registrador.'
+                );
+              }
+
+              const payload = rows[0].payload;
+
+              if (!payload?.state) {
+                throw Error('Los datos compartidos no tienen el formato esperado.');
+              }
+
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.state));
+
+              if (payload.template) {
+                localStorage.setItem(TEMPLATE_KEY, JSON.stringify(payload.template));
+              }
+
+              load();
+              renderAll();
+
+              cloudStatus('cloud-team-status', 'Datos descargados correctamente.');
+            } catch (e) {
+              cloudStatus('cloud-team-status', 'Error al descargar: ' + e.message);
+            }
+          }
+
+          // Detectar el archivado de un partido y guardarlo en la cola local.
+          if (typeof archiveCurrentMatch === 'function' &&
+              !window.apCloudArchiveWrapped) {
+
+            const apOriginalArchiveCurrentMatch = archiveCurrentMatch;
+
+            archiveCurrentMatch = function() {
+              const before = (S.matchHistory || []).length;
+
+              apOriginalArchiveCurrentMatch.apply(this, arguments);
+
+              const after = (S.matchHistory || []).length;
+
+              if (after > before) {
+                const match = S.matchHistory[S.matchHistory.length - 1];
+
+                if (match?.id) {
+                  const pending = cloudPendingMatches();
+
+                  if (!pending.includes(match.id)) {
+                    pending.push(match.id);
+                    localStorage.setItem(
+  cloudPendingKey(),
+  JSON.stringify(pending)
+);
+                  }
+
+                  if (navigator.onLine) {
+                    setTimeout(() => cloudSyncPending(), 1500);
+                  } else {
+                    cloudStatus(
+                      'cloud-team-status',
+                      'Partido guardado en este dispositivo. Se sincronizara al recuperar Internet.'
+                    );
+                  }
+                }
+              }
+            };
+
+            window.apCloudArchiveWrapped = true;
+          }
+
+          // Reintentar automáticamente cuando vuelva la conexión.
+          window.addEventListener('online', () => {
+            cloudSyncPending();
+          });
+// Activar automáticamente el equipo guardado al abrir la aplicación.
+const savedTeam = cloudTeam();
+
+if (savedTeam) {
+  try {
+    cloudActivateTeam(savedTeam);
+  } catch (e) {
+    console.error('No se pudo activar el almacenamiento del equipo:', e);
+  }
+}
+          window.addEventListener('load', cloudRefreshStatus);
+          """
+              tail = '</script></body></html>'
+              if tail not in s:
+                  raise SystemExit("No se encontro el final del HTML.")
+              s = s.replace(tail, script + '\n' + tail, 1)
+
+          s = s.replace('__SUPABASE_URL__', os.environ['SUPABASE_URL'].rstrip('/'))
+          s = s.replace('__SUPABASE_PUBLISHABLE_KEY__', os.environ['SUPABASE_PUBLISHABLE_KEY'])
+          if '__SUPABASE_URL__' in s or '__SUPABASE_PUBLISHABLE_KEY__' in s:
+              raise SystemExit("No se pudo configurar Supabase.")
+
+          html.write_text(s, encoding="utf-8")
+
+          manifest_text = manifest.read_text(encoding="utf-8")
+          permission = 'android.permission.INTERNET'
+          if permission not in manifest_text:
+              manifest_text = manifest_text.replace(
+                  '<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
+                  '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n    <uses-permission android:name="android.permission.INTERNET" />',
+                  1
+              )
+          manifest.write_text(manifest_text, encoding="utf-8")
+          print("Interfaz de nube y permiso de Internet preparados.")
+          PY
+
+      - name: Compilar APK de prueba
+        run: |
+          cd extracted-source/AP_FUTSAL_Android
+          gradle assembleDebug
+
+      - name: Guardar APK de prueba
+        uses: actions/upload-artifact@v4
+        with:
+          name: AP-FUTSAL-Cloud-Test
+          path: extracted-source/AP_FUTSAL_Android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          
