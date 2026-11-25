@@ -66,6 +66,21 @@ private String pendingBackupJson;
             runOnUiThread(() -> showPrintPreview(html));
         }
     }
+    private class BackupBridge {
+    @JavascriptInterface
+    public void saveBackup(String json, String filename) {
+        runOnUiThread(() -> {
+            pendingBackupJson = json;
+
+            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("application/json");
+            intent.putExtra(Intent.EXTRA_TITLE, filename);
+
+            startActivityForResult(intent, BACKUP_CREATE_REQUEST);
+        });
+    }
+    }
 
     private void showPrintPreview(String html) {
         if (printOverlay != null) root.removeView(printOverlay);
