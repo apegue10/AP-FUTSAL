@@ -95,9 +95,95 @@ jobs:
             catch (_) { return null; }
           }
           function cloudTeam() {
-            try { return JSON.parse(localStorage.getItem(AP_CLOUD_TEAM) || 'null'); }
-            catch (_) { return null; }
-          }
+  try {
+    return JSON.parse(localStorage.getItem(AP_CLOUD_TEAM) || 'null');
+  } catch (_) {
+    return null;
+  }
+}
+
+// Identifica el equipo cuyos datos están activos en este dispositivo.
+let AP_CLOUD_ACTIVE_TEAM_ID = null;
+
+// Marca qué equipo recibió por primera vez los datos antiguos.
+const AP_CLOUD_MIGRATION_KEY = 'ap-futsal-storage-owner-v1';
+
+function cloudActivateTeam(team) {
+  if (!team || !team.id) return false;
+
+  const teamId = String(team.id);
+
+  if (AP_CLOUD_ACTIVE_TEAM_ID === teamId) return false;
+
+  // Guardar el equipo anterior antes de cambiar de almacenamiento.
+  if (AP_CLOUD_ACTIVE_TEAM_ID !== null) {
+    save();
+  }
+
+  const newStorageKey =
+    'futsal-bench-manager-v4:team:' + encodeURIComponent(teamId);
+
+  const newTemplateKey =
+    'ap-futsal-template-v1:team:' + encodeURIComponent(teamId);
+
+  // Si es el primer equipo, conservar todos los datos antiguos.
+  const migrationOwner = localStorage.getItem(AP_CLOUD_MIGRATION_KEY);
+
+  if (!migrationOwner) {
+    const oldState = localStorage.getItem('futsal-bench-manager-v4');
+    const oldTemplate = localStorage.getItem('ap-futsal-template-v1');
+
+    if (!localStorage.getItem(newStorageKey) && oldState) {
+      localStorage.setItem(newStorageKey, oldState);
+    }
+
+    if (!localStorage.getItem(newTemplateKey) && oldTemplate) {
+      localStorage.setItem(newTemplateKey, oldTemplate);
+    }
+
+    localStorage.setItem(AP_CLOUD_MIGRATION_KEY, teamId);
+  }
+
+  // Activar las claves exclusivas del equipo.
+  STORAGE_KEY = newStorageKey;
+  TEMPLATE_KEY = newTemplateKey;
+  AP_CLOUD_ACTIVE_TEAM_ID = teamId;
+
+  // Preparar un estado vacío antes de cargar los datos del nuevo equipo.
+  S = {
+    players: JSON.parse(JSON.stringify(defaultPlayers)),
+    slots: [null, null, null, null, null],
+    period: 1,
+    extraTimeOccurred: false,
+    remaining: 1200,
+    halfLength: 20,
+    running: false,
+    startedAt: null,
+    endAt: null,
+    startRemaining: 1200,
+    lastElapsedSynced: 0,
+    scoreNos: 0,
+    scoreRiv: 0,
+    foulsNos: 0,
+    foulsRiv: 0,
+    events: [],
+    matchHistory: [],
+    competitions: [],
+    selectedSlot: null,
+    selectedPlayerId: null,
+    benchAll: false,
+    teamName: 'Nosotros',
+    rivalName: 'Rival',
+    competition: '',
+    venue: 'Local'
+  };
+
+  // Recuperar los datos propios del equipo, si ya existen.
+  load();
+  renderAll();
+
+  return true;
+}
           function cloudStatus(id, message) {
             const el = document.getElementById(id);
             if (el) el.textContent = message;
