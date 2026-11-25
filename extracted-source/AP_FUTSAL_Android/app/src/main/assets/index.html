@@ -1377,7 +1377,9 @@ function saveManualMatchForm(){
  save();
 
  try{
-  const key='AP_FUTSAL_CLOUD_PENDING';
+  const key = typeof cloudPendingKey === 'function'
+  ? cloudPendingKey()
+  : 'AP_FUTSAL_CLOUD_PENDING';
   const pending=JSON.parse(localStorage.getItem(key)||'[]');
 
   if(!pending.includes(match.id))pending.push(match.id);
