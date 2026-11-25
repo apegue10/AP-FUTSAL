@@ -1618,7 +1618,9 @@ save();
 
 // Marcar el partido manual como pendiente de sincronización.
 try{
- const key='AP_FUTSAL_CLOUD_PENDING';
+ const key = typeof cloudPendingKey === 'function'
+  ? cloudPendingKey()
+  : 'AP_FUTSAL_CLOUD_PENDING';
  const pending=JSON.parse(localStorage.getItem(key)||'[]');
  if(!pending.includes(match.id))pending.push(match.id);
  localStorage.setItem(key,JSON.stringify(pending));
