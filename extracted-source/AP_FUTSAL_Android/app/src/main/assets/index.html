@@ -1121,7 +1121,7 @@ statsList.innerHTML=`
    <tbody>
     ${window.manualMatchRoster.map((p,i)=>`
      <tr>
-      <td>#${esc(String(p.number))} ${esc(p.name)}</td>
+      <td>${esc(String(p.number))} ${esc(p.name)}</td>
       <td><input type="number" class="manual-stat-goals" data-index="${i}" min="0" value="0" style="width:55px"></td>
       <td><input type="number" class="manual-stat-assists" data-index="${i}" min="0" value="0" style="width:55px"></td>
       <td><strong class="manual-stat-total" data-index="${i}">00:00</strong></td>
