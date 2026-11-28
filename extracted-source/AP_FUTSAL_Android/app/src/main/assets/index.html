@@ -1863,8 +1863,86 @@ function download(data,name,type){
  setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
   
-function saveCurrentMatch(){syncClock();if(!matchHasActivity()){alert('Este partido está vacío. Registra algún dato antes de guardarlo.');return;}const m=snapshotMatch('Partido',true);m.id='m-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);m.status='archived';S.matchHistory.push(m);S.running=false;S.startedAt=null;S.endAt=null;S.scoreNos=0;S.scoreRiv=0;S.foulsNos=0;S.foulsRiv=0;S.period=1;S.remaining=S.halfLength*60;S.startRemaining=S.remaining;S.lastElapsedSynced=0;S.slots=[null,null,null,null,null];S.events=[];S.players.forEach(p=>{p.secondsP1=0;p.secondsP2=0;p.goals=0;p.assists=0;p.goalsFor=0;p.goalsAgainst=0;p.yellows=0;p.doubleYellows=0;p.reds=0;p.ejected=false;p.plusMinus=0});save();renderAll();switchView('partido');alert('Partido guardado en el historial con sus estadísticas y eventos. El partido actual se ha dejado en blanco para el siguiente.');}
-function deleteCurrentMatch(){if(!confirm('¿Eliminar TODOS los datos del partido actual (marcador, tiempos, goles, tarjetas y eventos)? Los partidos ya guardados en el historial y la plantilla base se conservarán.'))return;S.running=false;S.startedAt=null;S.endAt=null;S.scoreNos=0;S.scoreRiv=0;S.foulsNos=0;S.foulsRiv=0;S.period=1;S.remaining=S.halfLength*60;S.startRemaining=S.remaining;S.lastElapsedSynced=0;S.slots=[null,null,null,null,null];S.events=[];S.players.forEach(p=>{p.secondsP1=0;p.secondsP2=0;p.goals=0;p.assists=0;p.goalsFor=0;p.goalsAgainst=0;p.yellows=0;p.doubleYellows=0;p.reds=0;p.ejected=false;p.plusMinus=0});save();renderAll();switchView('partido');alert('Partido actual eliminado. La plantilla guardada y el historial no se han borrado.');}
+function saveCurrentMatch(){
+ syncClock();
+ if(!matchHasActivity()){
+  alert('Este partido está vacío. Registra algún dato antes de guardarlo.');
+  return;
+ }
+ const m=snapshotMatch('Partido',true);
+ m.id='m-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+ m.status='archived';
+ S.matchHistory.push(m);
+ S.running=false;
+ S.startedAt=null;
+ S.endAt=null;
+ S.scoreNos=0;
+ S.scoreRiv=0;
+ S.foulsNos=0;
+ S.foulsRiv=0;
+ S.period=1;
+ S.extraTimeOccurred=false;
+ S.remaining=S.halfLength*60;
+ S.startRemaining=S.remaining;
+ S.lastElapsedSynced=0;
+ S.slots=[null,null,null,null,null];
+ S.events=[];
+ S.players.forEach(p=>{
+  p.secondsP1=0;
+  p.secondsP2=0;
+  p.secondsP3=0;
+  p.secondsP4=0;
+  p.goals=0;
+  p.assists=0;
+  p.goalsFor=0;
+  p.goalsAgainst=0;
+  p.yellows=0;
+  p.doubleYellows=0;
+  p.reds=0;
+  p.ejected=false;
+  p.plusMinus=0;
+ });
+ save();
+ renderAll();
+ switchView('partido');
+ alert('Partido guardado en el historial con sus estadísticas y eventos. El partido actual se ha dejado en blanco para el siguiente.');
+}
+function deleteCurrentMatch(){
+ if(!confirm('¿Eliminar TODOS los datos del partido actual (marcador, tiempos, goles, tarjetas y eventos)? Los partidos ya guardados en el historial y la plantilla base se conservarán.'))return;
+ S.running=false;
+ S.startedAt=null;
+ S.endAt=null;
+ S.scoreNos=0;
+ S.scoreRiv=0;
+ S.foulsNos=0;
+ S.foulsRiv=0;
+ S.period=1;
+ S.extraTimeOccurred=false;
+ S.remaining=S.halfLength*60;
+ S.startRemaining=S.remaining;
+ S.lastElapsedSynced=0;
+ S.slots=[null,null,null,null,null];
+ S.events=[];
+ S.players.forEach(p=>{
+  p.secondsP1=0;
+  p.secondsP2=0;
+  p.secondsP3=0;
+  p.secondsP4=0;
+  p.goals=0;
+  p.assists=0;
+  p.goalsFor=0;
+  p.goalsAgainst=0;
+  p.yellows=0;
+  p.doubleYellows=0;
+  p.reds=0;
+  p.ejected=false;
+  p.plusMinus=0;
+ });
+ save();
+ renderAll();
+ switchView('partido');
+ alert('Partido actual eliminado. La plantilla guardada y el historial no se han borrado.');
+}
 function deleteSavedMatch(id){
  if(!confirm('¿Eliminar este partido del historial? Sus estadísticas dejarán de contar en las estadísticas generales.'))return;
 
