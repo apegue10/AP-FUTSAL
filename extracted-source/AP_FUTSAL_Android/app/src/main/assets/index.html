@@ -1281,7 +1281,7 @@ function saveManualMatchForm(){
 
  for(const p of players){
   if((p.doubleYellows||0)*2>(p.yellows||0)){
-   alert('Las dobles amarillas de #'+p.number+' '+p.name+' no pueden superar la mitad de sus tarjetas amarillas.');
+   alert('Las dobles amarillas de '+p.number+' '+p.name+' no pueden superar la mitad de sus tarjetas amarillas.');
    return;
   }
  }
@@ -1442,7 +1442,7 @@ const time=(label)=>{
  const foulsRiv=number('Faltas del rival');if(foulsRiv===null)return;
 const roster=[];
 for(const p of S.players){
- if(confirm('¿Estuvo convocado #'+p.number+' '+p.name+'?')){
+ if(confirm('¿Estuvo convocado '+p.number+' '+p.name+'?')){
   roster.push({
    playerId:p.id,
    number:p.number,
@@ -1474,7 +1474,7 @@ for(const p of S.players){
 };
  for(const p of S.players){
   if(!roster.some(r=>String(r.playerId)===String(p.id)))continue;
-  if(!confirm('¿Añadir estadísticas de #'+p.number+' '+p.name+'?'))continue;
+  if(!confirm('¿Añadir estadísticas de '+p.number+' '+p.name+'?'))continue;
   const p2={playerId:p.id,number:p.number,name:p.name};
   const fields=[
    ['Minutos jugados en 1.ª parte','secondsP1',true],
@@ -1495,13 +1495,13 @@ for(const [label,key,isMinutes] of fields){
   // Registrar tarjetas de todos los convocados,
 // independientemente de sus minutos o estadísticas.
 for(const p of roster){
- const yellows=number('Tarjetas amarillas de #'+p.number+' '+p.name);
+ const yellows=number('Tarjetas amarillas de '+p.number+' '+p.name);
  if(yellows===null)return;
 
- const doubleYellows=number('Dobles amarillas de #'+p.number+' '+p.name);
+ const doubleYellows=number('Dobles amarillas de '+p.number+' '+p.name);
  if(doubleYellows===null)return;
 
- const reds=number('Tarjetas rojas de #'+p.number+' '+p.name);
+ const reds=number('Tarjetas rojas de '+p.number+' '+p.name);
  if(reds===null)return;
 
  const simpleYellows=Math.max(0,yellows-2*doubleYellows);
