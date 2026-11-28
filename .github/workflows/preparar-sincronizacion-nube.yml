@@ -339,14 +339,92 @@ jobs:
               cloudStatus('cloud-auth-status', 'Error: ' + e.message);
             }
           }
+          
+          function cloudClearLocalTeam() {
+            const team = cloudTeam();
+            const teamId = team?.id || AP_CLOUD_ACTIVE_TEAM_ID;
+
+            if (teamId) {
+              const encodedId = encodeURIComponent(teamId);
+              localStorage.removeItem('futsal-bench-manager-v4:team:' + encodedId);
+              localStorage.removeItem('ap-futsal-template-v1:team:' + encodedId);
+            }
+
+            localStorage.removeItem('futsal-bench-manager-v4');
+            localStorage.removeItem('ap-futsal-template-v1');
+            localStorage.removeItem(AP_CLOUD_TEAM);
+
+            AP_CLOUD_ACTIVE_TEAM_ID = null;
+            STORAGE_KEY = 'futsal-bench-manager-v4';
+            TEMPLATE_KEY = 'ap-futsal-template-v1';
+
+            S = {
+              players: JSON.parse(JSON.stringify(defaultPlayers)),
+              slots: [null, null, null, null, null],
+              period: 1,
+              extraTimeOccurred: false,
+              remaining: 1200,
+              halfLength: 20,
+              running: false,
+              startedAt: null,
+              endAt: null,
+              startRemaining: 1200,
+              lastElapsedSynced: 0,
+              scoreNos: 0,
+              scoreRiv: 0,
+              foulsNos: 0,
+              foulsRiv: 0,
+              events: [],
+              matchHistory: [],
+              competitions: [],
+              selectedSlot: null,
+              selectedPlayerId: null,
+              benchAll: false,
+              teamName: 'Nosotros',
+              rivalName: 'Rival',
+              competition: '',
+              venue: 'Local'
+            };
+
+            renderAll();
+            cloudStatus('cloud-auth-status', 'Ningun equipo seleccionado.');
+          }
+
           async function cloudSignOut() {
             try {
+              const pending = cloudPendingMatches();
+
+              if (pending.length) {
+                if (!navigator.onLine) {
+                  throw Error('Hay partidos pendientes de sincronizar. Conecta Internet y sincronizalos antes de cerrar sesion.');
+                }
+
+                await cloudSyncPending();
+
+                if (cloudPendingMatches().length) {
+                  throw Error('No se han podido sincronizar todos los partidos pendientes. No se ha cerrado la sesion para evitar perderlos.');
+                }
+              }
+
               const session = cloudSession();
-              if (session?.access_token) await cloudRequest('/auth/v1/logout', { method: 'POST' });
-            } catch (_) {}
-            localStorage.removeItem(AP_CLOUD_SESSION);
-            cloudStatus('cloud-auth-status', 'Sesion cerrada. Los datos locales se conservan.');
+
+              if (session?.access_token) {
+                try {
+                  await cloudRequest('/auth/v1/logout', { method: 'POST' });
+                } catch (e) {
+                  console.warn('No se pudo cerrar la sesion remota:', e);
+                }
+              }
+
+              localStorage.removeItem(AP_CLOUD_SESSION);
+              cloudClearLocalTeam();
+
+              cloudStatus('cloud-auth-status', 'Sesion cerrada. El equipo se ha desvinculado y los datos locales se han limpiado.');
+            } catch (e) {
+              cloudStatus('cloud-auth-status', 'No se pudo cerrar la sesion: ' + e.message);
+            }
           }
+          
           async function cloudCreateTeam() {
             try {
               cloudRequireSession();
@@ -609,16 +687,22 @@ jobs:
           window.addEventListener('online', () => {
             cloudSyncPending();
           });
-          // Activar automáticamente el equipo guardado al abrir la aplicación.
+          
+          // Solo se puede activar un equipo si existe una sesion iniciada.
           const savedTeam = cloudTeam();
 
-          if (savedTeam) {
-          try {
-          cloudActivateTeam(savedTeam);
-          } catch (e) {
-          console.error('No se pudo activar el almacenamiento del equipo:', e);
+          if (cloudSession()?.access_token && savedTeam) {
+            try {
+              cloudActivateTeam(savedTeam);
+            } catch (e) {
+              console.error('No se pudo activar el almacenamiento del equipo:', e);
+            }
+          } else if (!cloudSession()?.access_token && savedTeam) {
+            // Limpieza de equipos que quedaron vinculados por versiones anteriores.
+            cloudClearLocalTeam();
+            cloudStatus('cloud-auth-status', 'Inicia sesion para acceder a un equipo.');
           }
-          }
+
           window.addEventListener('load', cloudRefreshStatus);
           """
               tail = '</script></body></html>'
