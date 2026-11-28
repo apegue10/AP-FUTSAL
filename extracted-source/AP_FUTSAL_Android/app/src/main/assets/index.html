@@ -340,7 +340,7 @@ a.secondsP4+=extraP2;
 [...agg.values()]
 .sort((a,b)=>Number(a.number)-Number(b.number))
 .map(a=>`<tr>
-<td>#${esc(a.number)} ${esc(a.name)}</td>
+<td>${esc(a.number)} ${esc(a.name)}</td>
 <td>${a.convocations}</td>
 <td>${a.matches}</td>
 <td>${formatTime(a.seconds)}</td>
