@@ -815,7 +815,7 @@ if(editedMatch.manualFormVersion===2){
 
  for(const p of editedPlayers){
   if((p.doubleYellows||0)*2>(p.yellows||0)){
-   alert('Las dobles amarillas de #'+p.number+' '+p.name+' no pueden superar la mitad de sus tarjetas amarillas.');
+   alert('Las dobles amarillas de '+p.number+' '+p.name+' no pueden superar la mitad de sus tarjetas amarillas.');
    return;
   }
  }
