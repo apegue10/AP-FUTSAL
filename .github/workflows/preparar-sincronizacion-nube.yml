@@ -232,6 +232,7 @@ jobs:
 
           // Recuperar los datos propios del equipo, si ya existen.
           load();
+          apClearDuplicatedExtraTime();
           renderAll();
 
           return true;
