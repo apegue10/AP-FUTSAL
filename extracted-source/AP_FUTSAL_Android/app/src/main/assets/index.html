@@ -258,12 +258,37 @@ function renderBench(){
  renderSelectors();
 }
 function toggleBenchFilter(){S.benchAll=!S.benchAll;document.getElementById('bench-filter').textContent=S.benchAll?'Ocultar las que están en pista':'Ver todas las convocados';renderBench()}
-function renderSelectors(){const opts='<option value="">— Sin asignar —</option>'+S.players.map(p=>`<option value="${p.id}">${esc(p.number)} ${esc(p.name)}</option>`).join('');const penalty=document.getElementById('live-penalty-player');
-if(penalty){
- const old=penalty.value;
- penalty.innerHTML='<option value="">Selecciona un jugador</option>'+S.players.filter(p=>p.called&&!p.ejected).map(p=>`<option value="${p.id}">${esc(p.number)} ${esc(p.name)}</option>`).join('');
- if(old)penalty.value=old;
-}['goal-scorer','goal-assist','sub-out','sub-in'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const old=el.value;el.innerHTML=opts;if(old)el.value=old});['sub-out','sub-in'].forEach(id=>{const el=document.getElementById(id);if(!el)return;Array.from(el.options).forEach(o=>{if(!o.value)return;const p=S.players.find(x=>x.id===Number(o.value));if(!p)return;if(id==='sub-out')o.disabled=!S.slots.includes(p.id);else o.disabled=!p.called||S.slots.includes(p.id)})})}
+function renderSelectors(){
+ const activePlayers=S.players.filter(p=>!p.retired);
+ const opts='<option value="">— Sin asignar —</option>'+activePlayers.map(p=>`<option value="${p.id}">${esc(p.number)} ${esc(p.name)}</option>`).join('');
+ const penalty=document.getElementById('live-penalty-player');
+
+ if(penalty){
+  const old=penalty.value;
+  penalty.innerHTML='<option value="">Selecciona un jugador</option>'+activePlayers.filter(p=>p.called&&!p.ejected).map(p=>`<option value="${p.id}">${esc(p.number)} ${esc(p.name)}</option>`).join('');
+  if(old)penalty.value=old;
+ }
+
+ ['goal-scorer','goal-assist','sub-out','sub-in'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el)return;
+  const old=el.value;
+  el.innerHTML=opts;
+  if(old)el.value=old;
+ });
+
+ ['sub-out','sub-in'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el)return;
+  Array.from(el.options).forEach(o=>{
+   if(!o.value)return;
+   const p=activePlayers.find(x=>x.id===Number(o.value));
+   if(!p)return;
+   if(id==='sub-out')o.disabled=!S.slots.includes(p.id);
+   else o.disabled=!p.called||S.slots.includes(p.id);
+  });
+ });
+}
 function addGoal(team){const scorer=Number(document.getElementById('goal-scorer').value)||null;const assist=Number(document.getElementById('goal-assist').value)||null;const note=document.getElementById('goal-note').value.trim();registerTeamGoal(team,scorer,assist,note);document.getElementById('goal-note').value=''}
 function makeSub(){const out=Number(document.getElementById('sub-out').value),inn=Number(document.getElementById('sub-in').value);if(!out||!inn||out===inn){alert('Selecciona un jugador que sale y otro que entra.');return}const slot=S.slots.indexOf(out);if(slot<0){alert('El jugador que sale no está en pista.');return}if(S.slots.includes(inn)){alert('El jugador que entra ya está en pista.');return}S.selectedSlot=slot;setOnCourt(inn);renderAll()}
 function renderEvents(){const el=document.getElementById('recent-events');el.innerHTML=S.events.slice(0,100).map(e=>{const name=id=>{const p=S.players.find(x=>x.id===id);return p?p.number+' '+p.name:'—'};const q=(e.quintet||[]).map(id=>name(id)).filter(x=>x!=='—').join(', ')||'Quinteto no registrado';let detail='';if(e.type==='Gol a favor'||e.type==='Gol en contra')detail=`<div>${e.scorer?'Goleador: '+esc(name(e.scorer))+' · ':''}${e.assist?'Asistencia: '+esc(name(e.assist))+' · ':''}${esc(e.note||'')}</div><div class="muted">Marcador: ${e.scoreNos??S.scoreNos} - ${e.scoreRiv??S.scoreRiv}</div>`;if(e.type==='Cambio')detail=`<div>Sale: ${esc(name(e.outgoing))} · Entra: ${esc(name(e.incoming))}</div>`;if(e.type==='Penalti')detail=`<div>${esc(name(e.playerId))}: ${e.result==='scored'?'Penalti marcado':'Penalti fallado'}</div>`;return `<div class="event"><div><strong>${esc(e.type)} <span class="tag ${e.type==='Gol a favor'?'goal':e.type==='Gol en contra'?'contra':''}">${e.period}ª · ${esc(e.time)}</span></strong>${detail}<div class="muted">Quinteto: ${esc(q)}</div></div><button class="small" onclick="deleteEvent('${e.id}')">Deshacer</button></div>`}).join('')||'<div class="empty">Todavía no hay goles ni cambios registrados.</div>'}
