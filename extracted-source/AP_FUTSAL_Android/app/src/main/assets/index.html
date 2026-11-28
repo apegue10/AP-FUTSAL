@@ -461,7 +461,7 @@ ${m.penaltiesOccurred?'<td>'+penaltyCell+'</td>':''}
  const playerName=id=>{
   const p=(m.players||[]).find(x=>String(x.playerId)===String(id))
    ||(m.roster||[]).find(x=>String(x.playerId)===String(id));
-  return p?'#'+p.number+' '+p.name:'—';
+  return p?p.number+' '+p.name:'—';
  };
  document.getElementById('saved-match-info').innerHTML=
   `<p><strong>${esc(m.dateLabel||m.date||'')}</strong> · ${esc(m.venue||'')}</p>
