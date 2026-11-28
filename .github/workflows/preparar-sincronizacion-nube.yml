@@ -1,6 +1,9 @@
 name: Preparar sincronizacion nube AP FUTSAL
 
-"on":
+on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
