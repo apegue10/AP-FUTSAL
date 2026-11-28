@@ -65,15 +65,14 @@ jobs:
               panel = '''<section id="cloud-panel" class="panel" style="margin:12px">
           <h2>☁️ Cuenta y equipo</h2>
           <p class="muted">Tus datos locales se conservan. La sincronizacion requiere Internet.</p>
-          <div class="field"><label>Correo electronico</label><input id="cloud-email" type="email" autocomplete="email"></div>
-          <div class="field"><label>Contrasena</label><input id="cloud-password" type="password" autocomplete="current-password"></div>
-          <div class="tools"><button class="primary" onclick="cloudSignIn()">Iniciar sesion</button><button onclick="cloudSignUp()">Crear cuenta</button><button onclick="cloudSignOut()">Cerrar sesion</button></div>
+         <div class="field"><label>Correo electronico</label><input id="cloud-email" type="email" autocomplete="off"></div>
+         <div class="field"><label>Contrasena</label><input id="cloud-password" type="password" autocomplete="off"></div>
+         <div class="tools"><button class="primary" onclick="cloudSignIn()">Iniciar sesion</button><button onclick="cloudSignUp()">Crear cuenta</button><button onclick="cloudSignOut()">Cerrar sesion</button></div>
           <p id="cloud-auth-status" class="muted">Sin iniciar sesion.</p>
           <hr>
           <div class="field"><label>Nombre del equipo nuevo</label><input id="cloud-team-name" maxlength="80"></div>
           <button class="blue" onclick="cloudCreateTeam()">Crear equipo</button>
-          <div class="field"><label>Codigo de invitacion</label><input id="cloud-invite-code" maxlength="8" autocapitalize="characters"></div>
-          <button onclick="cloudJoinTeam()">Unirme a un equipo</button>
+         <div class="field"><label>Codigo de invitacion</label><input id="cloud-invite-code" maxlength="8" autocapitalize="characters" autocomplete="off"></div>          <button onclick="cloudJoinTeam()">Unirme a un equipo</button>
           <p id="cloud-team-status" class="muted">Ningun equipo seleccionado.</p>
           <div class="tools"><button class="primary" onclick="cloudPull()">Descargar datos</button><button class="blue" onclick="cloudPush()">Subir datos</button></div>
           <p class="muted">Antes de descargar, crea una copia JSON. Descargar reemplaza los datos locales por los compartidos del equipo. Subir publica los datos locales para el equipo.</p>
