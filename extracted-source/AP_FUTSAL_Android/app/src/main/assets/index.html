@@ -1195,7 +1195,7 @@ function manualMatchCollectStats(){
   const secondsP2=readTime('.manual-stat-p2[data-index="'+i+'"]');
   const secondsExtra=window.manualMatchDetails.extraTimeOccurred?readTime('.manual-stat-extra[data-index="'+i+'"]'):0;
   if(secondsP1===null||secondsP2===null||secondsExtra===null){
-    alert('Revisa los minutos de #'+p.number+' '+p.name+'. Usa el formato MM:SS, por ejemplo 12:35.');
+    alert('Revisa los minutos de '+p.number+' '+p.name+'. Usa el formato MM:SS, por ejemplo 12:35.');
    return false;
   }
 
