@@ -707,6 +707,7 @@ jobs:
               }
 
               load();
+              apClearDuplicatedExtraTime();
               renderAll();
 
               cloudStatus('cloud-team-status', 'Datos descargados correctamente.');
