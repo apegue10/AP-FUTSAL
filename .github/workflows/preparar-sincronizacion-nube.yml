@@ -102,12 +102,18 @@ jobs:
           return null;
           }
           }
-                    function apClearDuplicatedExtraTime() {
-            const history = Array.isArray(S.matchHistory) ? S.matchHistory : [];
+          
+          function apClearDuplicatedExtraTime() {
+            if (!Array.isArray(S.players)) return;
+
+            const history = Array.isArray(S.matchHistory)
+              ? S.matchHistory
+              : [];
             const last = history[history.length - 1];
 
             if (!last || !last.extraTimeOccurred || !S.extraTimeOccurred) return;
             if (!Array.isArray(last.players)) return;
+            if (last.players.length !== S.players.length) return;
 
             const archived = new Map(
               last.players.map(p => [String(p.playerId), p])
@@ -115,35 +121,48 @@ jobs:
 
             let hasExtraTime = false;
 
+            const sameNumber = (a, b) =>
+              (Number(a) || 0) === (Number(b) || 0);
+
+            const fields = [
+              'secondsP1',
+              'secondsP2',
+              'secondsP3',
+              'secondsP4',
+              'goals',
+              'assists',
+              'goalsFor',
+              'goalsAgainst',
+              'yellows',
+              'doubleYellows',
+              'reds'
+            ];
+
             for (const p of S.players) {
               const old = archived.get(String(p.id));
               if (!old) return;
 
-              const currentP1 = Number(p.secondsP1) || 0;
-              const currentP2 = Number(p.secondsP2) || 0;
-              const currentP3 = Number(p.secondsP3) || 0;
-              const currentP4 = Number(p.secondsP4) || 0;
+              for (const field of fields) {
+                if (!sameNumber(p[field], old[field])) return;
+              }
 
               if (
-                currentP1 !== (Number(old.secondsP1) || 0) ||
-                currentP2 !== (Number(old.secondsP2) || 0) ||
-                currentP3 !== (Number(old.secondsP3) || 0) ||
-                currentP4 !== (Number(old.secondsP4) || 0) ||
-                (Number(p.goals) || 0) !== (Number(old.goals) || 0) ||
-                (Number(p.assists) || 0) !== (Number(old.assists) || 0)
-              ) return;
-
-              if (currentP3 > 0 || currentP4 > 0) hasExtraTime = true;
+                (Number(p.secondsP3) || 0) > 0 ||
+                (Number(p.secondsP4) || 0) > 0
+              ) {
+                hasExtraTime = true;
+              }
             }
 
             if (!hasExtraTime) return;
 
             if (
-              S.scoreNos !== last.scoreNos ||
-              S.scoreRiv !== last.scoreRiv ||
-              (S.foulsNos || 0) !== (last.foulsNos || 0) ||
-              (S.foulsRiv || 0) !== (last.foulsRiv || 0) ||
-              JSON.stringify(S.events || []) !== JSON.stringify(last.events || [])
+              !sameNumber(S.scoreNos, last.scoreNos) ||
+              !sameNumber(S.scoreRiv, last.scoreRiv) ||
+              !sameNumber(S.foulsNos, last.foulsNos) ||
+              !sameNumber(S.foulsRiv, last.foulsRiv) ||
+              JSON.stringify(S.events || []) !==
+                JSON.stringify(last.events || [])
             ) return;
 
             S.players.forEach(p => {
@@ -154,11 +173,7 @@ jobs:
             S.extraTimeOccurred = false;
             save();
           }
-          // Identifica el equipo cuyos datos están activos en este dispositivo.
-          let AP_CLOUD_ACTIVE_TEAM_ID = null;
-
-          // Marca qué equipo recibió por primera vez los datos antiguos.
-          const AP_CLOUD_MIGRATION_KEY = 'ap-futsal-storage-owner-v1';
+          
 
           function cloudActivateTeam(team) {
           if (!team || !team.id) return false;
