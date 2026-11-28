@@ -495,10 +495,11 @@ a.secondsP4+=extraP2;
  });
 });
  document.getElementById('career-stats-body').innerHTML=
-[...agg.values()]
-.sort((a,b)=>Number(a.number)-Number(b.number))
-.map(a=>`<tr>
-<td>${esc(a.number)} ${esc(a.name)}</td>
+[...agg.entries()]
+.filter(([key])=>!(S.hiddenGeneralPlayers||[]).includes(key))
+.sort((a,b)=>Number(a[1].number)-Number(b[1].number))
+.map(([key,a])=>`<tr>
+<td>${esc(a.number)} ${esc(a.name)} <button class="warning small" onclick="hideGeneralPlayer('${encodeURIComponent(key)}')">Ocultar</button></td>
 <td>${a.convocations}</td>
 <td>${a.matches}</td>
 <td>${formatTime(a.seconds)}</td>
