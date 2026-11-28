@@ -418,7 +418,7 @@ jobs:
 
               localStorage.removeItem(AP_CLOUD_SESSION);
               cloudClearLocalTeam();
-                            // Borrar los datos introducidos en el formulario de acceso.
+              // Borrar los datos introducidos en el formulario de acceso.
               ['cloud-email', 'cloud-password', 'cloud-invite-code'].forEach(id => {
                 const field = document.getElementById(id);
                 if (field) field.value = '';
