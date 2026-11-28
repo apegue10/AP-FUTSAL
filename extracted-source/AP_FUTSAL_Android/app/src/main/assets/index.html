@@ -1214,7 +1214,7 @@ function manualMatchCollectStats(){
    const penaltyText=penaltyInput.value.toUpperCase().replace(/[\s,]+/g,'');
 
    if(!/^[MF]*$/.test(penaltyText)){
-    alert('En los penaltis de #'+p.number+' '+p.name+' utiliza solo M (marcado) o F (fallado).');
+    alert('En los penaltis de '+p.number+' '+p.name+' utiliza solo M (marcado) o F (fallado).');
     penaltyInput.focus();
     return false;
    }
