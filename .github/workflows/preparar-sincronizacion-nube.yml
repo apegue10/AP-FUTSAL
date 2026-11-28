@@ -592,24 +592,12 @@ jobs:
               'Se compartiran la plantilla y los datos actuales del equipo e historial. ¿Continuar?'
             )) return;
 
-            // Comprobar quién es el dispositivo registrador.
-            const rows = await cloudRequest(
-              '/rest/v1/team_app_data?team_id=eq.' +
-              encodeURIComponent(team.id) +
-              '&select=updated_by'
-            );
-
-            if (rows?.length && rows[0].updated_by !== session.user.id) {
-              throw Error(
-                'Este equipo ya tiene otro dispositivo registrador. ' +
-                'Puedes descargar sus datos, pero no sobrescribirlos.'
-              );
-            }
+            
 
             // Guardar una copia estable del estado en el momento de la subida.
             const stateSnapshot = JSON.parse(JSON.stringify(S));
             const templateRaw = localStorage.getItem(TEMPLATE_KEY);
-                        const payload = {
+              const payload = {
               format: 1,
               state: stateSnapshot,
               template: templateRaw ? JSON.parse(templateRaw) : null
