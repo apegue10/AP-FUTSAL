@@ -187,6 +187,22 @@ let S={players:defaultPlayers,slots:[null,null,null,null,null],period:1,extraTim
 
 function load(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const x=JSON.parse(raw);S={...S,...x,running:false,startedAt:null,endAt:null,lastElapsedSynced:0};S.matchHistory=Array.isArray(S.matchHistory)?S.matchHistory:[];S.competitions=Array.isArray(S.competitions)?S.competitions:[];const legacyComps=[S.competition,...S.matchHistory.map(m=>m.competition)].filter(v=>typeof v==='string'&&v.trim());legacyComps.forEach(c=>{if(!S.competitions.some(x=>x.toLocaleLowerCase('es-ES')===c.trim().toLocaleLowerCase('es-ES')))S.competitions.push(c.trim())});S.foulsNos=Math.max(0,Number(S.foulsNos)||0);S.foulsRiv=Math.max(0,Number(S.foulsRiv)||0);}}catch(e){console.warn(e)}const legacyNames=['Portero','Cierre','Ala 1','Ala 2','Pívot','Jugador 6','Jugador 7','Jugador 8','Jugador 9','Jugador 10','Jugador 11','Jugador 12','Jugador 13','Jugador 14','Jugador 15','Jugador 16','Jugador 17','Jugador 18','Jugador 19','Jugador 20'];const clearPlaceholder=p=>{const expected=legacyNames[Number(p.id)-1];if(expected&&p.name===expected&&String(p.number)===String(p.id)){p.name='';p.number='';p.called=false}};S.players.forEach(p=>{p.secondsP1=Number(p.secondsP1)||0;p.secondsP2=Number(p.secondsP2)||0;p.secondsP3=Number(p.secondsP3)||0;p.secondsP4=Number(p.secondsP4)||0;p.goalsFor=p.goalsFor||0;p.goalsAgainst=p.goalsAgainst||0;p.yellows=p.yellows||0;p.doubleYellows=p.doubleYellows||0;p.reds=p.reds||0;p.ejected=!!p.ejected});S.remaining=Math.max(0,Number(S.remaining)||S.halfLength*60);try{const tpl=JSON.parse(localStorage.getItem(TEMPLATE_KEY)||'null');if(tpl&&Array.isArray(tpl.players)){tpl.players.forEach(tp=>{clearPlaceholder(tp);let p=S.players.find(q=>q.id===tp.id);if(p){if(!p.retired){p.name=tp.name;p.number=tp.number;p.called=!!tp.called}}else{S.players.push({...tp,secondsP1:0,secondsP2:0,secondsP3:0,secondsP4:0,goals:0,assists:0,goalsFor:0,goalsAgainst:0,yellows:0,doubleYellows:0,reds:0,ejected:false,plusMinus:0})}});}}catch(e){console.warn('Plantilla guardada no disponible',e)}S.players.forEach(clearPlaceholder)}                                                                                                                           
 function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(S));const el=document.getElementById('storage-status');if(el)el.textContent='Guardado local: '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}catch(e){const el=document.getElementById('storage-status');if(el)el.textContent='No se pudo guardar automáticamente. Exporta una copia.'}}
+function hideGeneralPlayer(encodedKey){
+ const key=decodeURIComponent(encodedKey);
+ if(!Array.isArray(S.hiddenGeneralPlayers))S.hiddenGeneralPlayers=[];
+ if(!S.hiddenGeneralPlayers.includes(key)){
+  S.hiddenGeneralPlayers.push(key);
+ }
+ save();
+ renderStats();
+}
+
+function restoreGeneralPlayer(encodedKey){
+ const key=decodeURIComponent(encodedKey);
+ S.hiddenGeneralPlayers=(S.hiddenGeneralPlayers||[]).filter(k=>k!==key);
+ save();
+ renderStats();
+}
 function periodDuration(p=S.period){return p>=3?300:S.halfLength*60;}
 function stamp(){return {period:S.period,time:formatTime(S.remaining),elapsed:periodDuration()-S.remaining,remaining:S.remaining};}
 function formatTime(s){s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
