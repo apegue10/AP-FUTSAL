@@ -680,7 +680,7 @@ jobs:
 
               if (!rows?.length) {
                 throw Error(
-                  'No hay datos compartidos todavia. Sube primero los datos desde el dispositivo registrador.'
+                  'No hay datos compartidos todavia. Sube primero los datos desde algun dispositivo del equipo.'
                 );
               }
 
