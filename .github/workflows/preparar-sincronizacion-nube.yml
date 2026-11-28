@@ -597,7 +597,7 @@ jobs:
             // Guardar una copia estable del estado en el momento de la subida.
             const stateSnapshot = JSON.parse(JSON.stringify(S));
             const templateRaw = localStorage.getItem(TEMPLATE_KEY);
-              const payload = {
+            const payload = {
               format: 1,
               state: stateSnapshot,
               template: templateRaw ? JSON.parse(templateRaw) : null
