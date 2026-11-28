@@ -283,7 +283,7 @@ function renderRoster(){
   </div>
  `).join('')||'<div class="empty">No hay jugadores disponibles.</div>';
 }
-  function retirePlayer(id){
+function retirePlayer(id){
  const p=S.players.find(x=>x.id===id);
  if(!p||p.retired)return;
 
@@ -297,9 +297,9 @@ function renderRoster(){
  p.retired=true;
  p.called=false;
 
- save();
+ saveTemplate();
  renderAll();
-  }
+}
 function updatePlayer(id,field,value){const p=S.players.find(x=>x.id===id);if(!p)return;if(field==='name')p.name=value.trim()||p.name;else if(field==='number')p.number=value.trim()||p.number;save();renderBench();renderCourt();renderStats();const call=document.getElementById('callup-editor');if(call){const row=[...call.querySelectorAll('.player')].find((el,i)=>S.players[i]?.id===id);if(row){const n=row.querySelector('.name');if(n)n.textContent=p.number+' '+p.name;}}}
 function addPlayer(){const name=document.getElementById('new-name').value.trim(),num=Number(document.getElementById('new-number').value);if(!name){alert('Escribe el nombre del jugador.');return}S.players.push({id:Math.max(0,...S.players.map(p=>p.id))+1,number:Number.isFinite(num)?num:S.players.length+1,name,called:false,secondsP1:0,secondsP2:0,secondsP3:0,secondsP4:0,goals:0,assists:0,goalsFor:0,goalsAgainst:0,yellows:0,doubleYellows:0,reds:0,ejected:false,plusMinus:0});document.getElementById('new-name').value='';document.getElementById('new-number').value='';save();renderAll()}
 function editPlayer(id){const p=S.players.find(x=>x.id===id);if(!p)return;const name=prompt('Nombre del jugador:',p.name);if(name===null)return;const num=prompt('Dorsal:',p.number);if(num===null)return;p.name=name.trim()||p.name;p.number=num.trim()||p.number;save();renderAll()}
