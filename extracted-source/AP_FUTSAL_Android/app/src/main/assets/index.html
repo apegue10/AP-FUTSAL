@@ -644,8 +644,8 @@ function renderSavedMatchRosterEditor(){
     <label class="player" style="display:flex;align-items:center;gap:10px;padding:7px">
      <input type="checkbox" ${checked?'checked':''}
       onchange="updateSavedMatchRoster(${p.id},this.checked)">
-     <span>#${esc(String(p.number))} ${esc(p.name)}</span>
-    </label>
+    <span>${esc(String(p.number))} ${esc(p.name)}</span>
+</label>
    `;
   }).join('');
 }
