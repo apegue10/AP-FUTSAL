@@ -429,7 +429,7 @@ const penaltyCell=savedMatchEditing
   };
 
   return `<tr>
-   <td>#${esc(p.number)} ${esc(p.name)}</td>
+   <td>${esc(p.number)} ${esc(p.name)}</td>
    <td>${field('goals',p.goals)}</td>
    <td>${field('assists',p.assists)}</td>
    <td>${formatTime((p.secondsP1||0)+(p.secondsP2||0)+(m.extraTimeOccurred?extraSeconds:0))}</td>
