@@ -418,11 +418,11 @@ jobs:
 
               localStorage.removeItem(AP_CLOUD_SESSION);
               cloudClearLocalTeam();
-              // Borrar los datos introducidos en el formulario de acceso.
-          ['cloud-email', 'cloud-password', 'cloud-invite-code'].forEach(id => {
-         const field = document.getElementById(id);
-         if (field) field.value = '';
-         });
+                            // Borrar los datos introducidos en el formulario de acceso.
+              ['cloud-email', 'cloud-password', 'cloud-invite-code'].forEach(id => {
+                const field = document.getElementById(id);
+                if (field) field.value = '';
+              });
 
               cloudStatus('cloud-auth-status', 'Sesion cerrada. El equipo se ha desvinculado y los datos locales se han limpiado.');
             } catch (e) {
