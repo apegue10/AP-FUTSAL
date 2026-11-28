@@ -1226,7 +1226,7 @@ function manualMatchCollectStats(){
    const value=input.value;
 
    if(value===''||!Number.isInteger(Number(value))||Number(value)<0){
-    alert('Revisa las estadísticas de #'+p.number+' '+p.name+'. Deben ser números enteros iguales o superiores a cero.');
+    alert('Revisa las estadísticas de '+p.number+' '+p.name+'. Deben ser números enteros iguales o superiores a cero.');
     input.focus();
     return false;
    }
