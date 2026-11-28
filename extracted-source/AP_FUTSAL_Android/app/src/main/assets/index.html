@@ -55,7 +55,7 @@
 </div></div></section>
 <section id="view-plantilla" class="view"><div class="layout"><div class="panel"><h2>Editar jugadores</h2><div class="grid2"><div class="field"><label>Dorsal</label><input id="new-number" type="number" min="0" max="99" placeholder="10"></div><div class="field"><label>Nombre</label><input id="new-name" placeholder="Nombre de jugador"></div></div><button class="primary" onclick="addPlayer()">+ Añadir jugador</button><button class="blue" onclick="saveTemplate()" style="width:100%;margin-top:8px">Guardar plantilla para próximos partidos</button><p id="template-status" class="muted" style="font-size:12px;margin:8px 0">Los cambios se aplican al momento. Guarda la plantilla para conservarla como plantilla base.</p><div id="roster-editor" class="bench-list" style="margin-top:12px"></div></div><div class="panel"><h2>Convocatoria</h2><p class="muted" style="font-size:13px">Marca la casilla de cada jugador que puede participar en este partido. Máximo 14.</p><div id="callup-editor" class="bench-list"></div></div></div></section>
 <section id="view-estadisticas" class="view"><div class="panel"><h2>Estadísticas del partido actual</h2><div class="tools"><button class="primary" onclick="exportPDF('view-estadisticas')">Exportar estadísticas PDF</button><button onclick="exportCSV()">Exportar CSV para Excel</button><button onclick="exportBackup()">Copia de seguridad JSON</button><label class="small" style="background:#26364b;border-radius:10px;padding:8px 10px;cursor:pointer">Restaurar copia<input type="file" accept="application/json,.json" style="display:none" onchange="importBackup(event)"></label></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Jugador</th><th>Tiempo total</th><th>1.ª parte</th><th>2.ª parte</th><th id="stats-extra-p1" style="display:none">1.ª parte prórroga</th><th id="stats-extra-p2" style="display:none">2.ª parte prórroga</th><th>Goles</th><th>Asist.</th><th>Goles a favor en pista</th><th>Goles en contra en pista</th><th>Tarjetas</th></tr></thead><tbody id="stats-body"></tbody></table></div></div></section>
-<section id="view-generales" class="view"><div class="panel"><h2>Estadísticas generales por competición</h2><p class="muted" style="font-size:13px">Elige una competición para ver el acumulado de sus partidos. El historial conserva todos los encuentros.</p><div class="field" style="max-width:420px"><label for="stats-competition-filter">Ver estadísticas de</label><select id="stats-competition-filter" onchange="renderStats()"><option value="__all__">Todas las competiciones</option></select></div><div class="tools"><button class="primary" onclick="exportPDF('view-generales')">Exportar estadísticas generales a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Jugador</th><th>Convocatorias</th><th>Partidos con datos</th><th>Tiempo total</th><th>Goles</th><th>Asist.</th><th>Goles a favor en pista</th><th>Goles en contra en pista</th><th>Amarillas</th><th>Doble amarilla</th><th>Rojas</th></tr></thead><tbody id="career-stats-body"></tbody></table></div></div></section>
+<section id="view-generales" class="view"><div class="panel"><h2>Estadísticas generales por competición</h2><p class="muted" style="font-size:13px">Elige una competición para ver el acumulado de sus partidos. El historial conserva todos los encuentros.</p><div class="field" style="max-width:420px"><label for="stats-competition-filter">Ver estadísticas de</label><select id="stats-competition-filter" onchange="renderStats()"><option value="__all__">Todas las competiciones</option></select></div><div class="tools"><button class="primary" onclick="exportPDF('view-generales')">Exportar estadísticas generales a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div><div class="table-wrap"><table class="stats-table"><thead><tr><th>Jugador</th><th>Convocatorias</th><th>Partidos con datos</th><th>Tiempo total</th><th>1.ª prórroga</th><th>2.ª prórroga</th><th>Goles</th><th>Asist.</th><th>Goles a favor en pista</th><th>Goles en contra en pista</th><th>Amarillas</th><th>Doble amarilla</th><th>Rojas</th></tr></thead><tbody id="career-stats-body"></tbody></table></div></div></section>
 <section id="view-historial" class="view"><div class="panel"><h2>Historial de partidos</h2><p class="muted" style="font-size:13px">Los partidos guardados aparecerán aquí. Puedes eliminar individualmente los partidos de prueba.</p><div class="tools"><button class="primary" onclick="createManualMatch()">+ Crear partido manual</button><button class="primary" onclick="exportPDF('view-historial')">Exportar historial a PDF</button><button onclick="exportBackup()">Copia de seguridad JSON</button></div>    <div id="manual-match-screen" style="display:none;margin:20px 0;padding:15px;border:1px solid var(--border);border-radius:10px">
   <h2>Crear partido manual</h2>
 
@@ -275,10 +275,10 @@ const cards=(p.yellows||0)?'🟨 '+p.yellows+(p.doubleYellows?' (dobles: '+p.dou
 
 filteredAll.forEach(m=>{
  const hasData=p=>
-  ((p.secondsP1||0)+(p.secondsP2||0)>0)||
-  (p.goals||0)||(p.assists||0)||
-  (p.goalsFor||0)||(p.goalsAgainst||0)||
-  (p.yellows||0)||(p.doubleYellows||0)||(p.reds||0);
+ ((p.secondsP1||0)+(p.secondsP2||0)+(p.secondsP3||0)+(p.secondsP4||0)+(p.secondsExtra||0)>0)||
+ (p.goals||0)||(p.assists||0)||
+ (p.goalsFor||0)||(p.goalsAgainst||0)||
+ (p.yellows||0)||(p.doubleYellows||0)||(p.reds||0);
 
  const dataPlayers=m.players||[];
  const calledPlayers=Array.isArray(m.roster)
@@ -291,7 +291,7 @@ filteredAll.forEach(m=>{
   const k=getKey(p);
   if(!agg.has(k))agg.set(k,{
    number:p.number,name:p.name,
-   convocations:0,matches:0,seconds:0,
+   convocations:0,matches:0,seconds:0,secondsP3:0,secondsP4:0,
    goals:0,assists:0,gf:0,ga:0,
    yellows:0,doubleYellows:0,reds:0,
    calledSeen:new Set(),seen:new Set()
@@ -309,7 +309,7 @@ filteredAll.forEach(m=>{
   const k=getKey(p);
   if(!agg.has(k))agg.set(k,{
    number:p.number,name:p.name,
-   convocations:0,matches:0,seconds:0,
+   convocations:0,matches:0,seconds:0,secondsP3:0,secondsP4:0,
    goals:0,assists:0,gf:0,ga:0,
    yellows:0,doubleYellows:0,reds:0,
    calledSeen:new Set(),seen:new Set()
@@ -321,7 +321,11 @@ filteredAll.forEach(m=>{
    a.matches++;
    a.seen.add(m.id);
   }
-  a.seconds+=(p.secondsP1||0)+(p.secondsP2||0);
+const extraP1=Number(p.secondsP3)||Number(p.secondsExtra)||0;
+const extraP2=Number(p.secondsP4)||0;
+a.seconds+=(Number(p.secondsP1)||0)+(Number(p.secondsP2)||0)+extraP1+extraP2;
+a.secondsP3+=extraP1;
+a.secondsP4+=extraP2;
   a.goals+=p.goals||0;
   a.assists+=p.assists||0;
   a.gf+=p.goalsFor||0;
@@ -339,6 +343,8 @@ filteredAll.forEach(m=>{
 <td>${a.convocations}</td>
 <td>${a.matches}</td>
 <td>${formatTime(a.seconds)}</td>
+<td>${formatTime(a.secondsP3)}</td>
+<td>${formatTime(a.secondsP4)}</td>
 <td>${a.goals}</td>
 <td>${a.assists}</td>
 <td>${a.gf}</td>
@@ -347,7 +353,7 @@ filteredAll.forEach(m=>{
 <td>${a.doubleYellows}</td>
 <td>${a.reds}</td>
 </tr>`).join('')||
-'<tr><td colspan="11">Todavía no hay estadísticas registradas.</td></tr>';
+'<tr><td colspan="13">Todavía no hay estadísticas registradas.</td></tr>';
  const history=[...S.matchHistory];if(matchHasActivity())history.push(snapshotMatch('Partido actual',false));document.getElementById('match-history-body').innerHTML=history.sort((a,b)=>new Date(b.date||b.dateLabel||0)-new Date(a.date||a.dateLabel||0)).map(m=>`<tr><td>${esc(m.dateLabel||m.date||'—')}</td><td>${esc(m.venue||'—')}</td><td>${esc(m.teamName||'Equipo')}</td><td>${esc(m.rivalName||'—')}${m.manual?' (MANUAL)':''}</td><td>${esc(m.competition||'—')}</td><td>${m.scoreNos??0} - ${m.scoreRiv??0}${m.status==='actual'?' (actual)':''}</td><td>${(m.events||[]).length}</td><td>${m.status==='actual'?'—':`<button class="primary small" onclick="viewSavedMatch('${m.id}')">Ver estadísticas</button> <button class="primary small" onclick="editSavedMatch('${m.id}')">Editar</button> <button class="danger small" onclick="deleteSavedMatch('${m.id}')">Eliminar</button>`}</td></tr>`).join('')||'<tr><td colspan="8">Los partidos guardados aparecerán aquí.</td></tr>';
 }
 let savedMatchEditId=null;
