@@ -191,6 +191,49 @@ function periodDuration(p=S.period){return p>=3?300:S.halfLength*60;}
 function stamp(){return {period:S.period,time:formatTime(S.remaining),elapsed:periodDuration()-S.remaining,remaining:S.remaining};}
 function formatTime(s){s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function syncClock(){if(!S.running||S.endAt===null||S.endAt===undefined)return;const now=Date.now();const target=Math.max(0,Math.ceil((Number(S.endAt)-now)/1000));const elapsed=Math.max(0,Math.floor((Number(S.startRemaining)-target)));const elapsedPlayer=Math.max(0,elapsed-(Number(S.lastElapsedSynced)||0));if(elapsedPlayer>0){for(const id of S.slots){if(id===null)continue;const p=S.players.find(q=>q.id===id);if(p&&!p.ejected){const key=['secondsP1','secondsP2','secondsP3','secondsP4'][S.period-1]||'secondsP1';p[key]=(Number(p[key])||0)+elapsedPlayer;}}S.lastElapsedSynced=elapsed;}S.remaining=target;if(target<=0){S.remaining=0;S.running=false;S.startedAt=null;S.endAt=null;S.lastElapsedSynced=0;S.startRemaining=0;save();}}
+ function adjustClock(direction){
+ const delta=Number(direction);
+ if(delta!==1&&delta!==-1)return;
+
+ if(S.running)syncClock();
+
+ const duration=periodDuration();
+ const nextRemaining=S.remaining-delta;
+
+ if(nextRemaining<0||nextRemaining>duration){
+  save();
+  renderAll();
+  return;
+ }
+
+ const key=['secondsP1','secondsP2','secondsP3','secondsP4'][S.period-1]||'secondsP1';
+
+ for(const id of S.slots){
+  if(id===null)continue;
+  const p=S.players.find(q=>q.id===id);
+  if(p&&!p.ejected){
+   p[key]=Math.max(0,(Number(p[key])||0)+delta);
+  }
+ }
+
+ S.remaining=nextRemaining;
+
+ if(S.running){
+  S.startedAt=Date.now();
+  S.endAt=S.startedAt+S.remaining*1000;
+  S.startRemaining=S.remaining;
+  S.lastElapsedSynced=0;
+ }else{
+  S.startedAt=null;
+  S.endAt=null;
+  S.startRemaining=S.remaining;
+  S.lastElapsedSynced=0;
+ }
+
+ lastPaintedSecond=null;
+ save();
+ renderAll();
+ }
 function toggleClock(){if(S.running){syncClock();S.running=false;S.startedAt=null;S.endAt=null;S.lastElapsedSynced=0;S.startRemaining=S.remaining;}else{if(S.remaining<=0)return;S.running=true;S.startedAt=Date.now();S.endAt=S.startedAt+S.remaining*1000;S.startRemaining=S.remaining;S.lastElapsedSynced=0;}lastPaintedSecond=null;save();renderClock();}
 function renderClock(){document.getElementById('clock').textContent=formatTime(S.remaining);const b=document.getElementById('start-pause');b.textContent=S.running?'Ⅱ PAUSAR':'▶ INICIAR';b.className=S.running?'warning':'primary';for(let i=1;i<=4;i++){const el=document.getElementById('period-'+i);if(el)el.classList.toggle('active',S.period===i);}document.getElementById('score-nos').textContent=S.scoreNos;document.getElementById('score-riv').textContent=S.scoreRiv;document.getElementById('fouls-nos').textContent=S.foulsNos||0;document.getElementById('fouls-riv').textContent=S.foulsRiv||0;const tn=document.getElementById('score-team-name');const rn=document.getElementById('score-rival-name');if(tn)tn.textContent=(S.teamName||'Nosotros').toLocaleUpperCase('es-ES');if(rn)rn.textContent=(S.rivalName||'Rival').toLocaleUpperCase('es-ES');}
 function resetClock(){if(!confirm('¿Reiniciar el cronómetro de esta parte? No se borrarán los eventos guardados.'))return;S.running=false;S.startedAt=null;S.endAt=null;S.remaining=periodDuration();S.startRemaining=S.remaining;save();renderAll()}
