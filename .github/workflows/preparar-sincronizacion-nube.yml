@@ -90,6 +90,8 @@ jobs:
           const AP_CLOUD_KEY = '__SUPABASE_PUBLISHABLE_KEY__';
           const AP_CLOUD_SESSION = 'ap-futsal-cloud-session-v1';
           const AP_CLOUD_TEAM = 'ap-futsal-cloud-team-v1';
+          const AP_CLOUD_MIGRATION_KEY = 'ap-futsal-cloud-migration-owner-v1';
+          let AP_CLOUD_ACTIVE_TEAM_ID = null;
 
           function cloudSession() {
             try { return JSON.parse(localStorage.getItem(AP_CLOUD_SESSION) || 'null'); }
